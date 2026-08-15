@@ -7,11 +7,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Business Analytics Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 
   <style>
-    /* ============================================================
-       BASIC STYLES — students can tweak colors/fonts here
-       ============================================================ */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -19,77 +19,109 @@
     }
 
     body {
-      font-family: Arial, Helvetica, sans-serif;
-      color: #222;
-      background: #f7f7f7;
-      line-height: 1.5;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #f5efe0;
+      background: #0a0a0a;
+      line-height: 1.6;
     }
 
     .container {
       max-width: 900px;
       margin: 0 auto;
-      padding: 40px 20px;
+      padding: 0 20px 60px;
     }
 
-    /* ---------- HEADER (photo + name + subheading) ---------- */
     header {
       text-align: center;
-      margin-bottom: 30px;
+      padding: 40px 0 30px;
     }
 
-    /* Empty space for photo — replace with your own <img> if you like */
     .photo {
       width: 140px;
       height: 140px;
       border-radius: 50%;
-      background: #ddd;
-      border: 2px dashed #aaa;
-      margin: 0 auto 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #888;
-      font-size: font-size: 13px;
-      \n object-fit: cover;
+      border: 1px solid #f5efe0;
+      margin: 0 auto 20px;
+      display: block;
+      object-fit: cover;
     }
 
     header h1 {
-      font-size: 28px;
-      margin-bottom: 6px;
+      font-family: 'Bodoni Moda', serif;
+      font-weight: 400;
+      font-size: 44px;
+      color: #f5efe0;
+      margin-bottom: 12px;
     }
 
-    /* NAME */
-    header p {
-      font-size: 16px;
-      color: #555;
+    header .eyebrow {
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: #8a8578;
+      margin-bottom: 16px;
     }
 
-    /* EXPERIENCES */
+    header .tagline {
+      font-size: 13px;
+      color: #a39d8c;
+      margin-bottom: 10px;
+    }
 
-    /* ---------- TABS ---------- */
+    header .links {
+      font-size: 13px;
+      margin-bottom: 24px;
+    }
+
+    header .links a {
+      color: #f5efe0;
+      text-decoration: none;
+      border-bottom: 1px solid #a8895f;
+    }
+
+    header .links a:hover {
+      color: #a8895f;
+    }
+
+    .skills-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0;
+      margin-bottom: 10px;
+    }
+
+    .skills-row span {
+      border: 1px solid #3a3a35;
+      color: #f5efe0;
+      font-size: 11px;
+      padding: 7px 14px;
+      margin: 0 -1px -1px 0;
+    }
+
     .tabs {
       display: flex;
       justify-content: center;
       gap: 10px;
-      margin-bottom: 24px;
+      margin: 30px 0 24px;
     }
 
     .tab-button {
       padding: 10px 22px;
-      border: 1px solid #ccc;
-      background: #fff;
+      border: 1px solid #3a3a35;
+      background: transparent;
+      color: #a39d8c;
       cursor: pointer;
-      font-size: 15px;
-      border-radius: 4px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 1px;
     }
 
     .tab-button.active {
-      background: #2c3e50;
-      color: #fff;
-      border-color: #2c3e50;
+      background: #f5efe0;
+      color: #0a0a0a;
+      border-color: #f5efe0;
     }
 
-    /* ---------- TAB CONTENT ---------- */
     .tab-content {
       display: none;
     }
@@ -99,53 +131,63 @@
     }
 
     .panel {
-      background: #fff;
-      border: 1px solid #eee;
-      border-radius: 6px;
-      padding: 24px;
+      background: #141310;
+      border: 1px solid #2a2a27;
+      padding: 30px;
     }
 
-    /* ---------- PROJECT CARDS (1 x 3 grid) ---------- */
+    .panel p {
+      font-size: 13px;
+      color: #a39d8c;
+      margin-bottom: 16px;
+    }
+
+    .panel p:last-child {
+      margin-bottom: 0;
+    }
+
     .cards {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 16px;
     }
 
     .card {
-      border: 1px solid #eee;
-      border-radius: 6px;
-      overflow: hidden;
-      background: #fff;
+      border: 1px solid #2a2a27;
+      background: #141310;
     }
 
-    /* Empty space for project photo */
     .card-photo {
-      height: 120px;
-      background: #ddd;
-      border-bottom: 1px dashed #aaa;
+      height: 100px;
+      border-bottom: 1px solid #2a2a27;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #888;
-      font-size: 12px;
+      color: #6f6c63;
+      font-size: 11px;
     }
 
     .card-text {
-      padding: 14px;
+      padding: 16px;
     }
 
     .card-text h3 {
-      font-size: 16px;
-      margin-bottom: 6px;
+      font-family: 'Bodoni Moda', serif;
+      font-size: 17px;
+      color: #f5efe0;
+      margin-bottom: 8px;
+      font-weight: 400;
     }
 
     .card-text p {
-      font-size: 14px;
-      color: #555;
+      font-size: 12px;
+      color: #a39d8c;
     }
 
-    /* ---------- MOBILE: stack cards vertically ---------- */
+    .card-text a {
+      color: #a8895f;
+    }
+
     @media (max-width: 640px) {
       .cards {
         grid-template-columns: 1fr;
@@ -156,32 +198,33 @@
 
 <body>
   <div class="container">
-    <!-- ============================================================
-         HEADER: photo, name, experiences
-         ============================================================ -->
     <header>
-      <!-- Replace this div with <img src="your-photo.jpg" class="photo"> -->
       <img src="Photo.png" alt="Tasnim Raisa Hassan" class="photo">
-
+      <p class="eyebrow">FINANCE ANALYTICS / TECH CONSULTING</p>
       <h1>Tasnim Raisa Hassan</h1>
-      <p>Technology Consultant · Python · Machine Learning & AI · Data Visualization </p>
-      <p><a href="https://www.linkedin.com/in/tasnimhassan/" target="_blank">LinkedIn</a> · <a
-          href="https://github.com/tasnimrh" target="_blank">GitHub</a></p>
+      <p class="tagline">Technology Consultant · Python · Machine Learning & AI · Data Visualization · SQL</p>
+      <p class="links">
+        <a href="https://www.linkedin.com/in/tasnimhassan/" target="_blank">LinkedIn</a>
+        &nbsp;·&nbsp;
+        <a href="https://github.com/tasnimrh" target="_blank">GitHub</a>
+      </p>
+      <div class="skills-row">
+        <span>Python</span>
+        <span>SQL</span>
+        <span>Machine Learning & AI</span>
+        <span>Data Visualization</span>
+        <span>Data Mining</span>
+        <span>FP&A</span>
+        <span>Financial Modeling</span>
+        <span>Corporate Finance</span>
+      </div>
     </header>
 
-    <!-- ============================================================
-         TABS
-         ============================================================ -->
     <div class="tabs">
-      <button class="tab-button active" onclick="showTab('about')">
-        About Me
-      </button>
-      <button class="tab-button" onclick="showTab('projects')">
-        Projects
-      </button>
+      <button class="tab-button active" onclick="showTab('about')">About Me</button>
+      <button class="tab-button" onclick="showTab('projects')">Projects</button>
     </div>
 
-    <!-- ---------- TAB 1: ABOUT ME ---------- -->
     <div id="about" class="tab-content active">
       <div class="panel">
         <p>
@@ -190,25 +233,26 @@
           I work across Python, R, and SQL, and I am targeting financial analytics roles where I can turn data into
           business decisions.
         </p>
-
-        Previously a Finance Analyst at Informa Connect (Informa Plc) in London, UK, managing £70m in P&L and cash flow
-        reporting using SAP and TM1.
+        <p>
+          Previously a Finance Analyst at Informa Connect (Informa Plc) in London, UK, managing £70m in P&L and cash
+          flow
+          reporting using SAP and TM1.
+        </p>
       </div>
     </div>
 
-    <!-- ---------- TAB 2: PROJECTS ---------- -->
     <div id="projects" class="tab-content">
       <div class="cards">
-        <!-- CARD 1 -->
         <div class="card">
           <div class="card-photo">Project Image</div>
           <div class="card-text">
             <h3>Environment & Portfolio Setup</h3>
-            <p>Built a reproducible Python environment and practiced safe secrets handling with git and .env.</p>
+            <p>Built a reproducible Python environment and practiced safe secrets handling with git and .env.
+              <a href="https://github.com/tasnimrh/tasnimrh.github.io" target="_blank">View repo →</a>
+            </p>
           </div>
         </div>
 
-        <!-- CARD 2 -->
         <div class="card">
           <div class="card-photo">Project Image</div>
           <div class="card-text">
@@ -218,7 +262,6 @@
           </div>
         </div>
 
-        <!-- CARD 3 -->
         <div class="card">
           <div class="card-photo">Project Image</div>
           <div class="card-text">
@@ -231,20 +274,14 @@
     </div>
   </div>
 
-  <!-- ============================================================
-       SIMPLE TAB SWITCHING SCRIPT
-       ============================================================ -->
   <script>
     function showTab(id) {
-      // hide all tab contents
       document.querySelectorAll(".tab-content").forEach(function (el) {
         el.classList.remove("active");
       });
-      // remove active state from all buttons
       document.querySelectorAll(".tab-button").forEach(function (btn) {
         btn.classList.remove("active");
       });
-      // show the selected tab + highlight the clicked button
       document.getElementById(id).classList.add("active");
       event.target.classList.add("active");
     }
