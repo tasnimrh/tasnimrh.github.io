@@ -1,0 +1,212 @@
+---
+import Base from '../layouts/Base.astro';
+import Budget from '../components/Budget.astro';
+import { site, highlights, experience, education, leadership, certifications, toolkit } from '../data/site';
+import { projects } from '../data/projects';
+---
+
+<Base>
+  <section class="hero wrap">
+    <div class="hero-main">
+      <p class="kicker">{site.role}</p>
+      <h1>{site.name}</h1>
+      <p class="statement">{site.statement}</p>
+      <p class="status">{site.status}</p>
+      <ul class="meta">
+        <li>{site.location}</li>
+        <li>{site.eligibility}</li>
+      </ul>
+      <div class="actions">
+        <a class="btn primary" href={`mailto:${site.email}`}>Email me</a>
+        <a class="btn" href={site.resume}>Resume (PDF)</a>
+        <a class="btn" href={site.linkedin}>LinkedIn</a>
+      </div>
+    </div>
+
+    <aside class="hero-side" aria-labelledby="hl-title">
+      {
+        site.photo && (
+          <div class="portrait">
+            <img src={site.photo} alt={`Portrait of ${site.name}`} width="176" height="176" />
+          </div>
+        )
+      }
+      <h2 id="hl-title" class="label">Highlights</h2>
+      <dl class="highlights">
+        {
+          highlights.map((h) => (
+            <div>
+              <dt class="num">{h.figure}</dt>
+              <dd>
+                <b>{h.label}</b>
+                <span>{h.note}</span>
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </aside>
+  </section>
+
+  <section id="work" class="wrap section">
+    <header class="sec-head">
+      <span class="note">Note 1</span>
+      <h2>Selected work</h2>
+      <p>Each case starts with the business question, then what I did, the results and the limits.</p>
+    </header>
+
+    {
+      projects.map((p, i) => (
+        <article class:list={['case', { lead: i === 0 }]}>
+          <div class="case-text">
+            <p class="kicker">{p.kicker}, {p.when}</p>
+            <h3>
+              <a href={`/work/${p.slug}/`}>{p.title}</a>
+            </h3>
+            <p class="question">{p.question}</p>
+            <p class="answer">{p.answer}</p>
+            <a class="more" href={`/work/${p.slug}/`} aria-label={`Read the ${p.title} case study`}>
+              Read the case study
+            </a>
+          </div>
+          <div class="case-vis">
+            {p.budget ? (
+              <Budget compact />
+            ) : (
+              p.media && (
+                <a class="shot" href={`/work/${p.slug}/`} tabindex="-1" aria-hidden="true">
+                  <img src={p.media[0].poster ?? p.media[0].src} alt="" width={p.media[0].w} height={p.media[0].h} loading="lazy" decoding="async" />
+                </a>
+              )
+            )}
+          </div>
+        </article>
+      ))
+    }
+
+    <article class="case now">
+      <div class="case-text">
+        <p class="kicker">In progress, Sep 2026 to present</p>
+        <h3>Sales analytics for Novartis Pharma Canada</h3>
+        <p class="question">Where should a pharmaceutical field team spend its time?</p>
+        <p class="answer-s">
+          McGill capstone with Novartis. I lead a team of four and own the solution architecture: HCP segmentation, territory
+          optimization and field activity insights in one dashboard.
+        </p>
+      </div>
+    </article>
+  </section>
+
+  <section id="experience" class="wrap section">
+    <header class="sec-head">
+      <span class="note">Note 2</span>
+      <h2>Experience</h2>
+      <p>Four years in London finance, then analytics.</p>
+    </header>
+    <ol class="ledger">
+      {
+        experience.map((job) => (
+          <li class="job">
+            <div class="org">
+              <h3>{job.org}</h3>
+              <p>
+                {job.parent && <>{job.parent}, </>}
+                {job.place}
+              </p>
+            </div>
+            <div class="roles">
+              {job.roles.map((r) => (
+                <div class="role">
+                  <div class="role-head">
+                    <h4>{r.title}</h4>
+                    <span class="when num">{r.when}</span>
+                  </div>
+                  <ul>
+                    {r.points.map((pt) => (
+                      <li>{pt}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section id="education" class="wrap section">
+    <header class="sec-head">
+      <span class="note">Note 3</span>
+      <h2>Education and leadership</h2>
+    </header>
+    <div class="cols">
+      <div>
+        <h3 class="label">Education</h3>
+        <ul class="entries">
+          {
+            education.map((e) => (
+              <li>
+                <b>{e.degree}</b>
+                <span>{e.org}</span>
+                <span class="when num">{e.when}</span>
+                <p>{e.detail}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div>
+        <h3 class="label">Leadership</h3>
+        <ul class="entries">
+          {
+            leadership.map((l) => (
+              <li>
+                <b>{l.role}</b>
+                <span>{l.org}</span>
+                <span class="when num">{l.when}</span>
+                <p>{l.text}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div>
+        <h3 class="label">Certifications</h3>
+        <ul class="entries">
+          {
+            certifications.map((c) => (
+              <li>
+                <b>{c.name}</b>
+                <span>{c.by}</span>
+                <span class="when num">{c.when}</span>
+              </li>
+            ))
+          }
+        </ul>
+        <h3 class="label">Toolkit</h3>
+        <dl class="toolkit">
+          {
+            toolkit.map((t) => (
+              <div>
+                <dt>{t.group}</dt>
+                <dd>{t.items.join(', ')}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="wrap section contact">
+    <span class="note">Note 4</span>
+    <h2>Let’s talk.</h2>
+    <p>{site.status}</p>
+    <a class="big-mail" href={`mailto:${site.email}`}>{site.email}</a>
+    <div class="actions">
+      <a class="btn" href={site.linkedin}>LinkedIn</a>
+      <a class="btn" href={site.resume}>Resume (PDF)</a>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,93 @@
+---
+import Base from '../../layouts/Base.astro';
+import Gallery from '../../components/Gallery.astro';
+import Budget from '../../components/Budget.astro';
+import { projects } from '../../data/projects';
+
+export function getStaticPaths() {
+  return projects.map((project, i) => ({
+    params: { slug: project.slug },
+    props: { project, next: projects[(i + 1) % projects.length] },
+  }));
+}
+
+const { project: p, next } = Astro.props;
+---
+
+<Base title={p.title} description={p.summary}>
+  <article class="wrap case-page">
+    <header class="case-head">
+      <a class="back" href="/#work">All work</a>
+      <p class="kicker">{p.kicker}, {p.when}</p>
+      <h1>{p.title}</h1>
+      <p class="question">{p.question}</p>
+      <p class="lede">{p.summary}</p>
+    </header>
+
+    <dl class="facts">
+      {
+        p.facts.map((f) => (
+          <div>
+            <dt>{f.label}</dt>
+            <dd>{f.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+
+    {
+      p.budget && (
+        <section class="case-block">
+          <h2>Try it</h2>
+          <p class="hint">Move the slider to change how many orders operations can check each day.</p>
+          <Budget />
+        </section>
+      )
+    }
+
+    <div class="case-body">
+      <h2>The problem</h2>
+      <div>{p.problem.map((t) => <p>{t}</p>)}</div>
+
+      <h2>What I did</h2>
+      <div>
+        <ol class="steps">{p.myPart.map((t) => <li>{t}</li>)}</ol>
+      </div>
+
+      <h2>Results</h2>
+      <div>
+        <ul class="results">{p.results.map((t) => <li>{t}</li>)}</ul>
+      </div>
+
+      <h2>Limits</h2>
+      <div>{p.limits.map((t) => <p>{t}</p>)}</div>
+    </div>
+
+    {
+      p.media && (
+        <section class="case-block">
+          <h2>{p.budget ? 'From the analysis' : 'In action'}</h2>
+          <Gallery items={p.media} />
+        </section>
+      )
+    }
+
+    <div class="links">
+      {
+        p.links.map((l, i) => (
+          <a class:list={['btn', { primary: i === 0 }]} href={l.href}>
+            {l.label}
+          </a>
+        ))
+      }
+    </div>
+
+    <nav class="next" aria-label="More work">
+      <a href="/#work">All work</a>
+      <a class="nx" href={`/work/${next.slug}/`}>
+        <span class="label">Next case</span>
+        <strong>{next.title}</strong>
+      </a>
+    </nav>
+  </article>
+</Base>

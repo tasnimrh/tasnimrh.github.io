@@ -1,0 +1,99 @@
+---
+// The review-budget chart from the Olist project. Every point is recomputed from the
+// locked final model in my notebook (test set, April to July 2018). The page renders the
+// 10% reading as plain HTML, so it works without JavaScript; the slider only moves it.
+import curve from '../data/olist-curve.json';
+
+interface Props {
+  compact?: boolean;
+}
+const { compact = false } = Astro.props;
+
+const W = 640, H = 300, L = 58, R = 16, T = 14, B = 34;
+const x = (b: number) => L + ((b - 1) / 49) * (W - L - R);
+const y = (v: number) => T + (1 - v) * (H - T - B);
+const path = (s: number[]) => s.map((v, i) => `${i ? 'L' : 'M'}${x(i + 1).toFixed(1)},${y(v).toFixed(1)}`).join('');
+const S = curve.series;
+const start = 10;
+const caught = (k: keyof typeof S, b: number) => Math.round(S[k][b - 1] * curve.late);
+const perDay = (b: number) => Math.round((curve.n * b) / 100 / curve.days);
+const ordersPerDay = Math.round(curve.n / curve.days);
+---
+
+<div class:list={['budget', { compact }]} data-budget data-curve={JSON.stringify(curve)}>
+  <div class="budget-control">
+    <label for="budget-range">
+      Operations can check <output id="b-pct" class="num">{start}%</output> of orders a day{' '}
+      <span class="muted">(about <span class="num" id="b-day">{perDay(start)}</span> of {ordersPerDay})</span>
+    </label>
+    <input id="budget-range" type="range" min="1" max="50" step="1" value={start} aria-describedby="b-read" />
+  </div>
+
+  <div class="budget-body">
+    <figure class="budget-chart">
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="b-title">
+        <title id="b-title">Share of late orders caught at each review budget, for the final model, a two-feature baseline and random checks</title>
+        {[0, 0.25, 0.5, 0.75, 1].map((v) => (
+          <g class="grid">
+            <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} />
+            <text x={L - 8} y={y(v) + 4} text-anchor="end">{v * 100}%</text>
+          </g>
+        ))}
+        {[1, 10, 20, 30, 40, 50].map((b) => (
+          <text class="tick" x={x(b)} y={H - 12} text-anchor="middle">{b}%</text>
+        ))}
+        <path class="ln random" d={path(S.random)} />
+        <path class="ln b1" d={path(S.b1)} />
+        <path class="ln model" d={path(S.model)} />
+        <g class="cursor" data-cursor transform={`translate(${x(start)},0)`}>
+          <line y1={T} y2={H - B} />
+          <circle class="model" cy={y(S.model[start - 1])} r="5" data-dot="model" />
+          <circle class="b1" cy={y(S.b1[start - 1])} r="4" data-dot="b1" />
+          <circle class="random" cy={y(S.random[start - 1])} r="4" data-dot="random" />
+        </g>
+      </svg>
+      <figcaption>Share of all late orders caught, by how many orders are checked. Test set: {curve.n.toLocaleString('en-US')} orders, {curve.late} late.</figcaption>
+    </figure>
+
+    <dl class="budget-read" id="b-read" aria-live="polite">
+      <div class="model">
+        <dt><i></i>Final model</dt>
+        <dd><b class="num" data-out="model">{caught('model', start)}</b> late orders caught</dd>
+      </div>
+      <div class="b1">
+        <dt><i></i>Two-feature baseline</dt>
+        <dd><b class="num" data-out="b1">{caught('b1', start)}</b></dd>
+      </div>
+      <div class="random">
+        <dt><i></i>Random checks</dt>
+        <dd><b class="num" data-out="random">{caught('random', start)}</b></dd>
+      </div>
+      <p class="muted">Out of <span class="num">{curve.late}</span> late orders between April and July 2018.</p>
+    </dl>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-budget]').forEach((root) => {
+    const c = JSON.parse(root.dataset.curve!);
+    const W = 640, H = 300, L = 58, R = 16, T = 14, B = 34;
+    const x = (b: number) => L + ((b - 1) / 49) * (W - L - R);
+    const y = (v: number) => T + (1 - v) * (H - T - B);
+    const range = root.querySelector<HTMLInputElement>('input[type=range]')!;
+    const cursor = root.querySelector<SVGGElement>('[data-cursor]')!;
+    const set = () => {
+      const b = Number(range.value);
+      root.querySelector('#b-pct')!.textContent = `${b}%`;
+      root.querySelector('#b-day')!.textContent = String(Math.round((c.n * b) / 100 / c.days));
+      cursor.setAttribute('transform', `translate(${x(b)},0)`);
+      for (const k of ['model', 'b1', 'random']) {
+        const v = c.series[k][b - 1];
+        cursor.querySelector(`[data-dot=${k}]`)!.setAttribute('cy', String(y(v)));
+        root.querySelector(`[data-out=${k}]`)!.textContent = String(Math.round(v * c.late));
+      }
+      range.style.setProperty('--p', `${((b - 1) / 49) * 100}%`);
+    };
+    range.addEventListener('input', set);
+    set();
+  });
+</script>
