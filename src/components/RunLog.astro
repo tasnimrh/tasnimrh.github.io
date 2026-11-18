@@ -1,0 +1,48 @@
+---
+// SkillGuard's recorded result for the unsafe test skill, from the project README.
+// Rows appear in sequence when scrolled into view, ending in the decision.
+const rows = [
+  { k: 'Static scan, NVIDIA SkillSpector', v: '7 / 100', s: 'rated safe', tone: 'warn' },
+  { k: 'Receipt tasks in sandbox', v: '12 / 12', s: 'correct', tone: 'muted' },
+  { k: 'Private-file reads attempted', v: '13', s: 'all denied', tone: 'bad' },
+  { k: 'Model reviewer', v: 'allow', s: 'overruled', tone: 'warn' },
+  { k: 'SkillGuard decision', v: 'blocked', s: 'not installed', tone: 'ok' },
+];
+---
+
+<figure class="runlog" data-runlog>
+  <div class="rl-top mono">
+    <span>skillguard / recorded run</span>
+    <span>unsafe receipt skill</span>
+  </div>
+  <ol class="rl-rows">
+    {
+      rows.map((r, i) => (
+        <li class={`tone-${r.tone}`} style={`--i:${i}`}>
+          <span class="rl-k">{r.k}</span>
+          <span class="rl-dots" aria-hidden="true" />
+          <b class="rl-v mono">{r.v}</b>
+          <span class="rl-s mono">{r.s}</span>
+        </li>
+      ))
+    }
+  </ol>
+  <div class="rl-flow mono" aria-hidden="true">
+    <span>pause</span><i></i><span>sandbox</span><i></i><span>evidence</span><i></i><span class="end">decide</span>
+  </div>
+  <figcaption>The static scanner read the code and passed it. Running it showed what it actually did.</figcaption>
+</figure>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-runlog]').forEach((el) => {
+    new IntersectionObserver(
+      ([e], io) => {
+        if (e.isIntersecting) {
+          el.classList.add('run');
+          io.disconnect();
+        }
+      },
+      { threshold: 0.4 },
+    ).observe(el);
+  });
+</script>

@@ -52,24 +52,3 @@ const [lead, ...rest] = items;
     )
   }
 </div>
-
-<script>
-  // Play each clip only while it is visible, and not at all if the visitor prefers reduced motion.
-  const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const clips = document.querySelectorAll<HTMLVideoElement>('video[data-loop]');
-  if (calm) {
-    clips.forEach((v) => (v.controls = true));
-  } else {
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          const v = e.target as HTMLVideoElement;
-          if (e.isIntersecting) v.play().catch(() => (v.controls = true));
-          else v.pause();
-        }
-      },
-      { threshold: 0.35 },
-    );
-    clips.forEach((v) => io.observe(v));
-  }
-</script>

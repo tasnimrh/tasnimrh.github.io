@@ -3,18 +3,11 @@
 
 export const site = {
   name: 'Tasnim Hassan',
-  first: 'Tasnim',
-  role: 'Data science and AI',
-  headline: 'Data science and AI, backed by four years in finance.',
-  intro:
-    'I build models and data products that answer business questions. Before my Master of Management in Analytics at McGill, I spent four years in finance in London at Informa, Stagwell and KPMG, so I know what decision-makers need from the numbers.',
-  looking: 'Looking for roles in data science, technology consulting, strategy and digital transformation.',
-  status:
-    'Graduating from McGill in August 2027. Looking for roles in data science, technology consulting, strategy and digital transformation.',
-  location: 'Montreal',
-  eligibility: 'No sponsorship required',
+  role: 'Analytics and AI',
+  lead: 'I build machine learning and analytics for business decisions. Four years in corporate finance at Informa, Assembly Global and KPMG taught me what decision-makers need from the numbers.',
+  looking: 'Open to roles in data science, technology consulting, strategy and digital transformation.',
   description:
-    'Tasnim Hassan: data science and AI, backed by four years in finance at Informa, Stagwell and KPMG. McGill MMA. Looking for roles in data science, technology consulting, strategy and digital transformation.',
+    'Tasnim Hassan builds machine learning and analytics for business decisions, backed by four years in corporate finance at Informa, Assembly Global and KPMG. McGill MMA, graduating August 2027.',
   email: 'tasnim.hassan@mail.mcgill.ca',
   linkedin: 'https://www.linkedin.com/in/tasnimhassan/',
   github: 'https://github.com/tasnimrh',
@@ -23,12 +16,20 @@ export const site = {
   photo: '/tasnim.jpg',
 };
 
-// The numbers strip under the hero. Each one is backed by a project or the resume.
+// The first-glance facts. Recruiters check title, company, dates and education first,
+// so these sit on the first screen.
+export const glance = [
+  { k: 'Now', v: 'MMA candidate, McGill Desautels', d: 'GPA 4.0. Team lead on the Novartis capstone.' },
+  { k: 'Before', v: 'Finance Analyst, Informa', d: 'London, 2022 to 2025. Also Assembly Global and KPMG.' },
+  { k: 'Status', v: 'Based in Montreal', d: 'No sponsorship required. Graduating August 2027.' },
+];
+
+// The numbers strip. Each one is backed by a project or the resume.
 export const stats = [
-  { figure: '36%', label: 'of late deliveries caught by checking 10% of orders', href: '/work/olist-late-delivery/' },
-  { figure: '$0.48', label: 'for 821 model calls in an AI safety build', href: '/work/skillguard/' },
-  { figure: '£70M', label: 'portfolio reported monthly at Informa', href: '#experience' },
-  { figure: '4.0', label: 'GPA in McGill’s Master of Management in Analytics', href: '#education' },
+  { to: 36.1, dec: 1, suf: '%', label: 'of late deliveries caught by reviewing the riskiest 10% of orders', href: '/work/olist-late-delivery/' },
+  { to: 13, dec: 0, suf: '/13', label: 'private-file reads caught at runtime in an AI skill a static scanner rated safe', href: '/work/skillguard/' },
+  { to: 70, dec: 0, pre: '£', suf: 'M', label: 'multi-entity portfolio reported each month at Informa', href: '#experience' },
+  { to: 15, dec: 0, suf: '%', label: 'better forecast accuracy from budgets and three-year models', href: '#experience' },
 ];
 
 export type Role = { title: string; when: string; points: string[] };
@@ -41,8 +42,8 @@ export const experience: Job[] = [
     place: 'Montreal',
     roles: [
       {
-        title: 'Team lead and solutions architect',
-        when: 'Sep 2026 to present',
+        title: 'Team Lead and Solutions Architect',
+        when: 'Sep 2026 – Present',
         points: [
           'Leading a team of four building an AI-powered sales analytics solution for Novartis Pharma Canada: HCP segmentation, territory optimization and field activity insights in one dashboard.',
           'Designing the solution architecture across data, modelling and BI. Leading client meetings and owning the statement of work, scope and timelines.',
@@ -57,7 +58,7 @@ export const experience: Job[] = [
     roles: [
       {
         title: 'Finance Analyst',
-        when: 'May 2024 to Sep 2025',
+        when: 'May 2024 – Sep 2025',
         points: [
           'Owned month-end P&L and cash flow reporting for a £70M multi-entity portfolio, ensuring statutory compliance.',
           'Partnered with the CFO and 7+ cost centre heads to strengthen cost control and forecast accuracy.',
@@ -66,7 +67,7 @@ export const experience: Job[] = [
       },
       {
         title: 'Interim Business Controller',
-        when: 'Sep 2023 to Apr 2024',
+        when: 'Sep 2023 – Apr 2024',
         points: [
           'Directed end-to-end financial operations of a £30M business unit through a leadership transition.',
           'Delivered a 3-day IFRS close across P&L, balance sheet and cash flow; enforced accrual, VAT and CAPEX policy.',
@@ -75,7 +76,7 @@ export const experience: Job[] = [
       },
       {
         title: 'Graduate Finance Analyst',
-        when: 'Aug 2022 to Aug 2023',
+        when: 'Aug 2022 – Aug 2023',
         points: ['Standardized planning and performance reporting across business units, building TM1 and Power BI solutions.'],
       },
     ],
@@ -87,7 +88,7 @@ export const experience: Job[] = [
     roles: [
       {
         title: 'Finance Associate',
-        when: 'Jan 2022 to Jul 2022',
+        when: 'Jan 2022 – Jul 2022',
         points: [
           'Managed multi-entity balance sheet reconciliations, resolving intercompany discrepancies ahead of audit.',
           'Consolidated trial balances into reporting packs and variance analysis for leadership performance reviews.',
@@ -101,7 +102,7 @@ export const experience: Job[] = [
     roles: [
       {
         title: 'Consulting Summer Intern',
-        when: 'Jun 2021 to Aug 2021',
+        when: 'Jun 2021 – Aug 2021',
         points: ['Conducted benchmarking, data analysis and market research informing client transformation strategy.'],
       },
     ],
@@ -112,46 +113,33 @@ export const education = [
   {
     org: 'McGill University, Desautels Faculty of Management',
     degree: 'Master of Management in Analytics',
-    when: 'Jul 2026 to Aug 2027',
-    detail: 'GPA 4.0/4.0. Entrance Scholarship. Coursework in enterprise data science, AI and deep learning, and multivariate statistics.',
+    when: '2026 – 2027',
+    detail: 'GPA 4.0/4.0. Entrance Scholarship. Enterprise data science, AI and deep learning, multivariate statistics.',
   },
   {
     org: 'De Montfort University',
     degree: 'BA (Hons) Business Management and Finance',
-    when: 'Sep 2018 to Jun 2021',
+    when: '2018 – 2021',
     detail: "First-Class Honours, top of cohort in major. Dean's List. DMU International Scholarship. Teaching assistant.",
   },
 ];
 
 export const leadership = [
-  {
-    org: 'Thinkr Consulting',
-    role: 'Consultant',
-    when: 'Sep 2026 to present',
-    text: 'Data-driven recommendations for OsteoVie, a multidisciplinary wellness clinic in Montreal.',
-  },
-  {
-    org: 'McGill Case Competition Association',
-    role: 'Vice President, Finance',
-    when: 'Sep 2026 to present',
-    text: 'Budgeting, sponsorship funds and spending for case competitions with universities worldwide.',
-  },
-  {
-    org: 'Desautels Graduate Women’s Association',
-    role: 'MMA Representative',
-    when: 'Sep 2026 to present',
-    text: 'Represents MMA students and co-organizes networking and leadership events for women in business.',
-  },
+  { org: 'McGill Case Competition Association', role: 'Vice President, Finance', when: '2026 – Present' },
+  { org: 'Thinkr Consulting', role: 'Consultant, OsteoVie engagement', when: '2026 – Present' },
+  { org: 'Desautels Graduate Women’s Association', role: 'MMA Representative', when: '2026 – Present' },
+];
+
+export const capabilities = [
+  { area: 'Modelling', items: ['Python', 'scikit-learn', 'pandas', 'NumPy', 'R', 'Statistics'] },
+  { area: 'Data', items: ['SQL', 'Spark', 'Kafka', 'Databricks'] },
+  { area: 'BI and reporting', items: ['Power BI', 'Tableau', 'Advanced Excel'] },
+  { area: 'Finance systems', items: ['SAP', 'TM1', 'Salesforce', 'Sage'] },
+  { area: 'Tooling', items: ['Docker', 'Git', 'Matplotlib', 'Seaborn'] },
 ];
 
 export const certifications = [
   { name: 'AI Fluency: Framework and Foundations', by: 'Anthropic', when: 'Oct 2026' },
   { name: 'AWS Cloud Practitioner Essentials', by: 'Amazon Web Services', when: 'Oct 2026' },
-  { name: 'Databricks Fundamentals accreditation', by: 'Databricks', when: 'Oct 2026' },
-];
-
-export const toolkit = [
-  { group: 'Data and ML', items: ['Python', 'pandas', 'scikit-learn', 'R', 'SQL', 'Spark', 'Kafka', 'Docker', 'Git'] },
-  { group: 'BI and reporting', items: ['Power BI', 'Tableau', 'Advanced Excel'] },
-  { group: 'Finance systems', items: ['SAP', 'TM1', 'Salesforce', 'Sage'] },
+  { name: 'Databricks Fundamentals', by: 'Databricks', when: 'Oct 2026' },
 ];

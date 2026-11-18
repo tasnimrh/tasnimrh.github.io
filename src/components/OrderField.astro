@@ -1,0 +1,157 @@
+---
+// The hero visual. Every dot is a real order from the Olist test set (1,600 sampled in time
+// order from 21,333), coloured by what the final model did with it. The animation scores the
+// orders left to right, then re-sorts them by predicted risk so the top 10% band is visible.
+import sample from '../data/olist_sample.json';
+
+const n = sample.p.length;
+const late = sample.late.reduce((a, b) => a + b, 0);
+const caught = sample.p.filter((p, i) => p >= sample.flagThreshold && sample.late[i]).length;
+const flagged = sample.p.filter((p) => p >= sample.flagThreshold).length;
+---
+
+<figure class="field" aria-labelledby="field-cap">
+  <div class="field-top mono">
+    <span><i class="pulse" aria-hidden="true"></i>olist / test set / final model</span>
+    <span class="field-mode" data-mode>time order</span>
+  </div>
+  <div class="field-canvas">
+    <canvas data-field data-sample={JSON.stringify(sample)} aria-hidden="true"></canvas>
+    <span class="band-label mono" data-band>review budget: riskiest 10%</span>
+  </div>
+  <dl class="field-read mono">
+    <div><dt>orders</dt><dd data-r="scored">{n.toLocaleString('en-US')}</dd></div>
+    <div><dt>flagged</dt><dd data-r="flagged">{flagged}</dd></div>
+    <div><dt>late</dt><dd data-r="late">{late}</dd></div>
+    <div class="hi"><dt>late caught</dt><dd data-r="caught">{caught}</dd></div>
+  </dl>
+  <figcaption id="field-cap">
+    <span class="lg"><i class="d caught"></i>Flagged and late</span>
+    <span class="lg"><i class="d flag"></i>Flagged</span>
+    <span class="lg"><i class="d miss"></i>Late, missed</span>
+    <span class="note">Real orders from the held-out test set, sampled from {sample.n.toLocaleString('en-US')}.</span>
+  </figcaption>
+</figure>
+
+<script>
+  type Sample = { p: number[]; late: number[]; flagThreshold: number };
+  const canvas = document.querySelector<HTMLCanvasElement>('[data-field]');
+  if (canvas) {
+    const S: Sample = JSON.parse(canvas.dataset.sample!);
+    const N = S.p.length;
+    const ctx = canvas.getContext('2d')!;
+    const root = canvas.closest('.field') as HTMLElement;
+    const modeEl = root.querySelector('[data-mode]')!;
+    const band = root.querySelector<HTMLElement>('[data-band]')!;
+    const out = (k: string) => root.querySelector(`[data-r=${k}]`)!;
+    const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const css = getComputedStyle(document.documentElement);
+    const C = {
+      dim: css.getPropertyValue('--dot').trim() || '#2b3036',
+      accent: css.getPropertyValue('--accent').trim() || '#7ee0c3',
+      miss: css.getPropertyValue('--miss').trim() || '#e58d8d',
+    };
+    const flagged = S.p.map((p) => p >= S.flagThreshold);
+    // Rank orders by predicted risk, riskiest first, for the sorted layout.
+    const order = [...Array(N).keys()].sort((a, b) => S.p[b] - S.p[a]);
+    const rankOf = new Array(N);
+    order.forEach((i, r) => (rankOf[i] = r));
+
+    let W = 0, H = 0, cols = 50, rows = 32, cell = 10, ox = 0, oy = 0;
+    const fit = () => {
+      const r = canvas.getBoundingClientRect();
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      W = r.width; H = r.height;
+      cols = W < 420 ? 40 : 50;
+      rows = Math.ceil(N / cols);
+      cell = Math.min(W / cols, H / rows);
+      ox = (W - cell * cols) / 2; oy = (H - cell * rows) / 2;
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const flagRows = Math.ceil(order.findIndex((i) => !flagged[i]) / cols);
+      band.style.top = `calc(1rem + ${oy - 3}px)`;
+      band.style.height = `${flagRows * cell + 6}px`;
+    };
+    // Time-order layout fills column by column so the sweep reads left to right.
+    const posTime = (i: number) => [ox + (Math.floor(i / rows) + 0.5) * cell, oy + ((i % rows) + 0.5) * cell];
+    const posRank = (i: number) => {
+      const r = rankOf[i];
+      return [ox + ((r % cols) + 0.5) * cell, oy + (Math.floor(r / cols) + 0.5) * cell];
+    };
+    const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+    // Phases (ms): sweep, hold, sort, hold, unsort.
+    const P = { sweep: 2600, hold1: 1200, sort: 1300, hold2: 3200, back: 1100 };
+    const cycle = P.sweep + P.hold1 + P.sort + P.hold2 + P.back;
+    let t0 = performance.now(), running = false, raf = 0;
+
+    const draw = (now: number) => {
+      const t = calm ? P.sweep + P.hold1 + P.sort + 10 : (now - t0) % cycle;
+      const sweep = Math.min(1, t / P.sweep);
+      let mix = 0;
+      const a = P.sweep + P.hold1, b = a + P.sort, c = b + P.hold2;
+      if (t >= a && t < b) mix = ease((t - a) / P.sort);
+      else if (t >= b && t < c) mix = 1;
+      else if (t >= c) mix = 1 - ease((t - c) / P.back);
+      const sweptCols = sweep * Math.ceil(N / rows);
+
+      ctx.clearRect(0, 0, W, H);
+      const r = Math.max(1.2, cell * 0.2);
+      let scored = 0, fl = 0, lt = 0, ca = 0;
+      for (let i = 0; i < N; i++) {
+        const [x1, y1] = posTime(i), [x2, y2] = posRank(i);
+        const x = x1 + (x2 - x1) * mix, y = y1 + (y2 - y1) * mix;
+        const seen = Math.floor(i / rows) < sweptCols || mix > 0;
+        if (!seen) {
+          ctx.globalAlpha = 0.35; ctx.fillStyle = C.dim;
+          ctx.beginPath(); ctx.arc(x, y, r * 0.8, 0, 6.283); ctx.fill();
+          continue;
+        }
+        scored++;
+        const isLate = S.late[i] === 1, isFlag = flagged[i];
+        if (isFlag) fl++; if (isLate) lt++; if (isFlag && isLate) ca++;
+        if (isFlag && isLate) {
+          ctx.globalAlpha = 1; ctx.fillStyle = C.accent;
+          ctx.shadowColor = C.accent; ctx.shadowBlur = 8;
+          ctx.beginPath(); ctx.arc(x, y, r * 1.5, 0, 6.283); ctx.fill();
+          ctx.shadowBlur = 0;
+        } else if (isFlag) {
+          ctx.globalAlpha = 0.9; ctx.strokeStyle = C.accent; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.arc(x, y, r * 1.15, 0, 6.283); ctx.stroke();
+        } else if (isLate) {
+          ctx.globalAlpha = 0.95; ctx.fillStyle = C.miss;
+          ctx.beginPath(); ctx.arc(x, y, r * 1.2, 0, 6.283); ctx.fill();
+        } else {
+          ctx.globalAlpha = 0.25 + S.p[i] * 0.45; ctx.fillStyle = C.dim;
+          ctx.beginPath(); ctx.arc(x, y, r, 0, 6.283); ctx.fill();
+        }
+      }
+      ctx.globalAlpha = 1;
+      // The scan line.
+      if (sweep < 1 && mix === 0) {
+        const sx = ox + sweptCols * cell;
+        const g = ctx.createLinearGradient(sx - 40, 0, sx, 0);
+        g.addColorStop(0, 'rgba(126,224,195,0)'); g.addColorStop(1, 'rgba(126,224,195,0.18)');
+        ctx.fillStyle = g; ctx.fillRect(sx - 40, oy, 40, rows * cell);
+        ctx.fillStyle = C.accent; ctx.fillRect(sx, oy, 1, rows * cell);
+      }
+      out('scored').textContent = scored.toLocaleString('en-US');
+      out('flagged').textContent = String(fl);
+      out('late').textContent = String(lt);
+      out('caught').textContent = String(ca);
+      modeEl.textContent = mix > 0.5 ? 'sorted by predicted risk' : sweep < 1 ? 'scoring…' : 'time order';
+      root.classList.toggle('sorted', mix > 0.98);
+      if (running && !calm) raf = requestAnimationFrame(draw);
+    };
+
+    fit();
+    new ResizeObserver(() => { fit(); if (!running) draw(performance.now()); }).observe(canvas);
+    const start = () => { if (!running) { running = true; raf = requestAnimationFrame(draw); } };
+    const stop = () => { running = false; cancelAnimationFrame(raf); };
+    if (calm) { root.classList.add('sorted'); draw(0); }
+    else {
+      new IntersectionObserver(([e]) => (e.isIntersecting ? start() : stop()), { threshold: 0.1 }).observe(canvas);
+      document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+    }
+  }
+</script>

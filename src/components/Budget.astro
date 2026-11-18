@@ -1,7 +1,7 @@
 ---
-// The review-budget chart from the Olist project. Every point is recomputed from the
-// locked final model in my notebook (test set, April to July 2018). The page renders the
-// 10% reading as plain HTML, so it works without JavaScript; the slider only moves it.
+// Review-budget chart from the Olist project. Every point is recomputed from the locked final
+// model in my notebook (test set, April to July 2018). The 10% reading is rendered as HTML so it
+// works without JavaScript; the slider moves it, and the lines draw in when scrolled into view.
 import curve from '../data/olist-curve.json';
 
 interface Props {
@@ -13,62 +13,72 @@ const W = 640, H = 300, L = 58, R = 16, T = 14, B = 34;
 const x = (b: number) => L + ((b - 1) / 49) * (W - L - R);
 const y = (v: number) => T + (1 - v) * (H - T - B);
 const path = (s: number[]) => s.map((v, i) => `${i ? 'L' : 'M'}${x(i + 1).toFixed(1)},${y(v).toFixed(1)}`).join('');
+const area = (s: number[]) => `${path(s)}L${x(50)},${y(0)}L${x(1)},${y(0)}Z`;
 const S = curve.series;
 const start = 10;
 const caught = (k: keyof typeof S, b: number) => Math.round(S[k][b - 1] * curve.late);
 const perDay = (b: number) => Math.round((curve.n * b) / 100 / curve.days);
 const ordersPerDay = Math.round(curve.n / curve.days);
+const uid = compact ? 'bc' : 'bf';
 ---
 
 <div class:list={['budget', { compact }]} data-budget data-curve={JSON.stringify(curve)}>
   <div class="budget-control">
-    <label for="budget-range">
-      Operations can check <output id="b-pct" class="num">{start}%</output> of orders a day{' '}
-      <span class="muted">(about <span class="num" id="b-day">{perDay(start)}</span> of {ordersPerDay})</span>
+    <label for={`${uid}-range`}>
+      Review <output class="num" data-pct>{start}%</output> of orders a day{' '}
+      <span class="muted">(about <span class="num" data-day>{perDay(start)}</span> of {ordersPerDay})</span>
     </label>
-    <input id="budget-range" type="range" min="1" max="50" step="1" value={start} aria-describedby="b-read" />
+    <input id={`${uid}-range`} type="range" min="1" max="50" step="1" value={start} />
   </div>
 
   <div class="budget-body">
     <figure class="budget-chart">
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="b-title">
-        <title id="b-title">Share of late orders caught at each review budget, for the final model, a two-feature baseline and random checks</title>
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Share of late orders caught at each review budget, for the final model, a two-feature baseline and random review">
+        <defs>
+          <linearGradient id={`${uid}-fill`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="var(--accent)" stop-opacity="0.22"></stop>
+            <stop offset="1" stop-color="var(--accent)" stop-opacity="0"></stop>
+          </linearGradient>
+        </defs>
         {[0, 0.25, 0.5, 0.75, 1].map((v) => (
           <g class="grid">
             <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} />
-            <text x={L - 8} y={y(v) + 4} text-anchor="end">{v * 100}%</text>
+            <text x={L - 10} y={y(v) + 4} text-anchor="end">{v * 100}%</text>
           </g>
         ))}
         {[1, 10, 20, 30, 40, 50].map((b) => (
-          <text class="tick" x={x(b)} y={H - 12} text-anchor="middle">{b}%</text>
+          <text class="tick" x={x(b)} y={H - 10} text-anchor="middle">{b}%</text>
         ))}
-        <path class="ln random" d={path(S.random)} />
-        <path class="ln b1" d={path(S.b1)} />
-        <path class="ln model" d={path(S.model)} />
+        <g class="draw">
+          <path class="area" d={area(S.model)} fill={`url(#${uid}-fill)`} />
+          <path class="ln random" d={path(S.random)} />
+          <path class="ln b1" d={path(S.b1)} />
+          <path class="ln model" d={path(S.model)} />
+        </g>
         <g class="cursor" data-cursor transform={`translate(${x(start)},0)`}>
           <line y1={T} y2={H - B} />
           <circle class="model" cy={y(S.model[start - 1])} r="5" data-dot="model" />
-          <circle class="b1" cy={y(S.b1[start - 1])} r="4" data-dot="b1" />
-          <circle class="random" cy={y(S.random[start - 1])} r="4" data-dot="random" />
+          <circle class="b1" cy={y(S.b1[start - 1])} r="3.5" data-dot="b1" />
+          <circle class="random" cy={y(S.random[start - 1])} r="3.5" data-dot="random" />
         </g>
       </svg>
-      <figcaption>Share of all late orders caught, by how many orders are checked. Test set: {curve.n.toLocaleString('en-US')} orders, {curve.late} late.</figcaption>
+      <figcaption>Share of all late orders caught, by review budget. Test set: {curve.n.toLocaleString('en-US')} orders, {curve.late} late.</figcaption>
     </figure>
 
-    <dl class="budget-read" id="b-read" aria-live="polite">
+    <dl class="budget-read" aria-live="polite">
       <div class="model">
         <dt><i></i>Final model</dt>
-        <dd><b class="num" data-out="model">{caught('model', start)}</b> <span class="u">late orders caught</span></dd>
+        <dd><b class="num" data-out="model">{caught('model', start)}</b><span class="u"> late orders caught</span></dd>
       </div>
       <div class="b1">
         <dt><i></i>Two-feature baseline</dt>
         <dd><b class="num" data-out="b1">{caught('b1', start)}</b></dd>
       </div>
       <div class="random">
-        <dt><i></i>Random checks</dt>
+        <dt><i></i>Random review</dt>
         <dd><b class="num" data-out="random">{caught('random', start)}</b></dd>
       </div>
-      <p class="muted">Out of <span class="num">{curve.late}</span> late orders between April and July 2018.</p>
+      <p class="muted">of {curve.late} late orders, April to July 2018</p>
     </dl>
   </div>
 </div>
@@ -83,8 +93,8 @@ const ordersPerDay = Math.round(curve.n / curve.days);
     const cursor = root.querySelector<SVGGElement>('[data-cursor]')!;
     const set = () => {
       const b = Number(range.value);
-      root.querySelector('#b-pct')!.textContent = `${b}%`;
-      root.querySelector('#b-day')!.textContent = String(Math.round((c.n * b) / 100 / c.days));
+      root.querySelector('[data-pct]')!.textContent = `${b}%`;
+      root.querySelector('[data-day]')!.textContent = String(Math.round((c.n * b) / 100 / c.days));
       cursor.setAttribute('transform', `translate(${x(b)},0)`);
       for (const k of ['model', 'b1', 'random']) {
         const v = c.series[k][b - 1];
@@ -95,5 +105,15 @@ const ordersPerDay = Math.round(curve.n / curve.days);
     };
     range.addEventListener('input', set);
     set();
+    // Draw the lines in once, the first time the chart is on screen.
+    new IntersectionObserver(
+      ([e], io) => {
+        if (e.isIntersecting) {
+          root.classList.add('drawn');
+          io.disconnect();
+        }
+      },
+      { threshold: 0.35 },
+    ).observe(root);
   });
 </script>
