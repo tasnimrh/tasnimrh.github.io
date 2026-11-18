@@ -143,3 +143,21 @@ export const certifications = [
   { name: 'AWS Cloud Practitioner Essentials', by: 'Amazon Web Services', when: 'Oct 2026' },
   { name: 'Databricks Fundamentals', by: 'Databricks', when: 'Oct 2026' },
 ];
+
+// Work in progress, shown under the case studies. No results are claimed until they exist.
+export const ongoing = [
+  {
+    title: 'Sales analytics for Novartis Pharma Canada',
+    context: 'McGill capstone with Novartis, Sep 2026 to present',
+    role: 'Team lead and solutions architect, team of four',
+    text: 'An AI-powered sales analytics solution: HCP segmentation, territory optimization and field activity insights in one decision-ready dashboard. I own the solution architecture, the client meetings and the statement of work.',
+    stack: [] as string[],
+  },
+  {
+    title: 'Origin: finding the change that caused a bug',
+    context: 'Atlassian Codegeist 2026 hackathon, Nov 2026 to present',
+    role: 'Project lead, team of two',
+    text: 'A Jira and Bitbucket app. When a bug fix is merged, it traces the fixed lines back through the code history to the pull request that introduced the bug, then suggests the affected releases and any maintained branches still missing the fix. Nothing is written to Jira until a person confirms. Accuracy will be measured against a published dataset of developer-labelled bug origins.',
+    stack: ['Atlassian Forge', 'Jira', 'Bitbucket'],
+  },
+];

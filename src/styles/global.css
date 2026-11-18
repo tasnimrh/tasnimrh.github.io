@@ -579,8 +579,17 @@ nav a:hover {
   align-items: start;
 }
 .p-body.single {
-  grid-template-columns: minmax(0, 1fr);
+  display: block;
   max-width: 60rem;
+}
+.p-body.single .p-sum {
+  max-width: 72ch;
+}
+.project.now {
+  padding: 2rem 0 2.25rem;
+}
+.project.now .p-head {
+  margin-bottom: 1rem;
 }
 .p-sum {
   color: #c3c7cd;
@@ -1473,6 +1482,12 @@ details li::before {
   }
   nav {
     gap: 1.1rem;
+  }
+  .hero .actions {
+    gap: 0.45rem;
+  }
+  .hero .btn:not(.icon) {
+    padding: 0 0.9rem;
   }
   .glance {
     grid-template-columns: 1fr;
