@@ -3,30 +3,32 @@
 
 export const site = {
   name: 'Tasnim Hassan',
-  role: 'Finance, data science and AI',
-  statement:
-    'Four years in London finance gave me a close view of how businesses make decisions. Now I add the technical depth.',
+  first: 'Tasnim',
+  role: 'Data science and AI',
+  headline: 'Data science and AI, backed by four years in finance.',
+  intro:
+    'I build models and data products that answer business questions. Before my Master of Management in Analytics at McGill, I spent four years in finance in London at Informa, Stagwell and KPMG, so I know what decision-makers need from the numbers.',
+  looking: 'Looking for roles in data science, technology consulting, strategy and digital transformation.',
   status:
-    'Master of Management in Analytics at McGill, graduating August 2027. Looking for roles in data science, technology consulting, strategy and digital transformation.',
-  location: 'Based in Montreal',
-  eligibility: 'Eligible for a 3-year open work permit. No sponsorship required.',
+    'Graduating from McGill in August 2027. Looking for roles in data science, technology consulting, strategy and digital transformation.',
+  location: 'Montreal',
+  eligibility: 'No sponsorship required',
   description:
-    'Tasnim Hassan: four years in London finance at Informa, Stagwell and KPMG, now a McGill MMA student. Looking for roles in data science, technology consulting, strategy and digital transformation.',
+    'Tasnim Hassan: data science and AI, backed by four years in finance at Informa, Stagwell and KPMG. McGill MMA. Looking for roles in data science, technology consulting, strategy and digital transformation.',
   email: 'tasnim.hassan@mail.mcgill.ca',
   linkedin: 'https://www.linkedin.com/in/tasnimhassan/',
   github: 'https://github.com/tasnimrh',
   repo: 'https://github.com/tasnimrh/tasnimrh.github.io',
   resume: '/Tasnim_Hassan_Resume.pdf',
-  // Set to '/tasnim.jpg' after adding a square photo to public/. Leave empty to show initials.
   photo: '/tasnim.jpg',
 };
 
-// The figures on the first screen. Every one is on the resume.
-export const highlights = [
-  { figure: '£70M', label: 'multi-entity portfolio', note: 'Month-end P&L and cash flow reporting, Informa' },
-  { figure: '3-day', label: 'IFRS close', note: 'Across a £30M business unit as Interim Business Controller' },
-  { figure: '15%', label: 'better forecast accuracy', note: 'From budgets and three-year strategic models' },
-  { figure: '4.0', label: 'GPA out of 4.0', note: 'McGill Master of Management in Analytics' },
+// The numbers strip under the hero. Each one is backed by a project or the resume.
+export const stats = [
+  { figure: '36%', label: 'of late deliveries caught by checking 10% of orders', href: '/work/olist-late-delivery/' },
+  { figure: '$0.48', label: 'for 821 model calls in an AI safety build', href: '/work/skillguard/' },
+  { figure: '£70M', label: 'portfolio reported monthly at Informa', href: '#experience' },
+  { figure: '4.0', label: 'GPA in McGill’s Master of Management in Analytics', href: '#education' },
 ];
 
 export type Role = { title: string; when: string; points: string[] };
@@ -149,8 +151,7 @@ export const certifications = [
 ];
 
 export const toolkit = [
-  { group: 'Analysis and ML', items: ['Python', 'pandas', 'scikit-learn', 'R', 'SQL', 'Spark', 'Kafka'] },
-  { group: 'BI', items: ['Power BI', 'Tableau', 'Advanced Excel'] },
+  { group: 'Data and ML', items: ['Python', 'pandas', 'scikit-learn', 'R', 'SQL', 'Spark', 'Kafka', 'Docker', 'Git'] },
+  { group: 'BI and reporting', items: ['Power BI', 'Tableau', 'Advanced Excel'] },
   { group: 'Finance systems', items: ['SAP', 'TM1', 'Salesforce', 'Sage'] },
-  { group: 'Engineering', items: ['Docker', 'Git'] },
 ];

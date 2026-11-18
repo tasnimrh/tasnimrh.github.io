@@ -1,131 +1,164 @@
 ---
 import Base from '../layouts/Base.astro';
 import Budget from '../components/Budget.astro';
-import { site, highlights, experience, education, leadership, certifications, toolkit } from '../data/site';
+import { site, stats, experience, education, leadership, certifications, toolkit } from '../data/site';
 import { projects } from '../data/projects';
 ---
 
 <Base>
-  <section class="hero wrap">
-    <div class="hero-main">
-      <p class="kicker">{site.role}</p>
-      <h1>{site.name}</h1>
-      <p class="statement">{site.statement}</p>
-      <p class="status">{site.status}</p>
-      <ul class="meta">
-        <li>{site.location}</li>
-        <li>{site.eligibility}</li>
-      </ul>
-      <div class="actions">
-        <a class="btn primary" href={`mailto:${site.email}`}>Email me</a>
-        <a class="btn" href={site.resume}>Resume (PDF)</a>
-        <a class="btn" href={site.linkedin}>LinkedIn</a>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-text">
+        <p class="eyebrow"><span class="live" aria-hidden="true"></span>Open to roles, graduating August 2027</p>
+        <h1>Tasnim<br />Hassan</h1>
+        <p class="headline">Data science and AI, backed by <em>four years in finance</em>.</p>
+        <p class="intro">{site.intro}</p>
+        <ul class="chips" aria-label="At a glance">
+          <li>{site.location}</li>
+          <li>{site.eligibility}</li>
+          <li>Data science, consulting, strategy</li>
+        </ul>
+        <div class="actions">
+          <a class="btn primary" href="#work">See my work</a>
+          <a class="btn" href={`mailto:${site.email}`}>Email me</a>
+          <a class="btn ghost" href={site.linkedin}>LinkedIn</a>
+        </div>
       </div>
+      <figure class="hero-photo">
+        <img src={site.photo} alt={`Portrait of ${site.name}`} width="400" height="400" fetchpriority="high" />
+        <figcaption>
+          <span>McGill MMA 2027</span>
+          <span>Ex Informa, Assembly Global, KPMG</span>
+        </figcaption>
+      </figure>
     </div>
+  </section>
 
-    <aside class="hero-side" aria-labelledby="hl-title">
-      {
-        site.photo && (
-          <div class="portrait">
-            <img src={site.photo} alt={`Portrait of ${site.name}`} width="176" height="176" />
-          </div>
-        )
-      }
-      <h2 id="hl-title" class="label">Highlights</h2>
-      <dl class="highlights">
-        {
-          highlights.map((h) => (
-            <div>
-              <dt class="num">{h.figure}</dt>
-              <dd>
-                <b>{h.label}</b>
-                <span>{h.note}</span>
-              </dd>
-            </div>
-          ))
-        }
-      </dl>
-    </aside>
+  <section class="wrap stats reveal" aria-label="Key numbers">
+    {
+      stats.map((s) => (
+        <a class="stat" href={s.href}>
+          <b class="num">{s.figure}</b>
+          <span>{s.label}</span>
+        </a>
+      ))
+    }
   </section>
 
   <section id="work" class="wrap section">
-    <header class="sec-head">
-      <span class="note">Note 1</span>
+    <header class="sec-head reveal">
+      <p class="tag">01 / Work</p>
       <h2>Selected work</h2>
-      <p>Each case starts with the business question, then what I did, the results and the limits.</p>
     </header>
 
-    {
-      projects.map((p, i) => (
-        <article class:list={['case', { lead: i === 0 }]}>
-          <div class="case-text">
-            <p class="kicker">{p.kicker}, {p.when}</p>
-            <h3>
-              <a href={`/work/${p.slug}/`}>{p.title}</a>
-            </h3>
-            <p class="question">{p.question}</p>
-            <p class="answer">{p.answer}</p>
-            <a class="more" href={`/work/${p.slug}/`} aria-label={`Read the ${p.title} case study`}>
-              Read the case study
-            </a>
-          </div>
-          <div class="case-vis">
-            {p.budget ? (
-              <Budget compact />
-            ) : (
-              p.media && (
-                <a class="shot" href={`/work/${p.slug}/`} tabindex="-1" aria-hidden="true">
-                  <img src={p.media[0].poster ?? p.media[0].src} alt="" width={p.media[0].w} height={p.media[0].h} loading="lazy" decoding="async" />
-                </a>
-              )
-            )}
-          </div>
-        </article>
-      ))
-    }
+    <div class="projects">
+      {
+        projects.map((p, i) => (
+          <article class:list={['project reveal', { flip: i % 2 === 1 }]}>
+            <div class="p-text">
+              <ul class="p-tags">
+                <li>{p.kicker}</li>
+                <li>{p.when}</li>
+              </ul>
+              <h3>
+                <a href={`/work/${p.slug}/`}>{p.title}</a>
+              </h3>
+              <p class="p-q">{p.question}</p>
+              <p class="p-a">{p.answer}</p>
+              <a class="arrow" href={`/work/${p.slug}/`} aria-label={`Read the ${p.title} case study`}>
+                Read the case study
+              </a>
+            </div>
+            <div class="p-vis">
+              {p.budget ? (
+                <Budget compact />
+              ) : (
+                p.media &&
+                (p.media[0].kind === 'video' ? (
+                  <video class="p-media" muted loop playsinline preload="none" poster={p.media[0].poster} width={p.media[0].w} height={p.media[0].h} aria-label={p.media[0].alt} data-loop>
+                    <source src={p.media[0].src} type="video/mp4" />
+                  </video>
+                ) : (
+                  <img class="p-media" src={p.media[0].src} alt={p.media[0].alt} width={p.media[0].w} height={p.media[0].h} loading="lazy" />
+                ))
+              )}
+            </div>
+          </article>
+        ))
+      }
 
-    <article class="case now">
-      <div class="case-text">
-        <p class="kicker">In progress, Sep 2026 to present</p>
-        <h3>Sales analytics for Novartis Pharma Canada</h3>
-        <p class="question">Where should a pharmaceutical field team spend its time?</p>
-        <p class="answer-s">
-          McGill capstone with Novartis. I lead a team of four and own the solution architecture: HCP segmentation, territory
-          optimization and field activity insights in one dashboard.
-        </p>
-      </div>
-    </article>
+      <article class="project now reveal">
+        <div class="p-text">
+          <ul class="p-tags">
+            <li>McGill capstone with Novartis</li>
+            <li class="hot">In progress</li>
+          </ul>
+          <h3>Sales analytics for Novartis Pharma Canada</h3>
+          <p class="p-q">Where should a pharmaceutical field team spend its time?</p>
+          <p class="p-a">
+            I lead a team of four and own the solution architecture: HCP segmentation, territory optimization and field activity
+            insights in one dashboard.
+          </p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="wrap section">
+    <header class="sec-head reveal">
+      <p class="tag">02 / Toolkit</p>
+      <h2>What I work with</h2>
+    </header>
+    <div class="toolkit reveal">
+      {
+        toolkit.map((t) => (
+          <div>
+            <h3>{t.group}</h3>
+            <ul>
+              {t.items.map((it) => (
+                <li>{it}</li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
   </section>
 
   <section id="experience" class="wrap section">
-    <header class="sec-head">
-      <span class="note">Note 2</span>
-      <h2>Experience</h2>
-      <p>Four years in London finance, then analytics.</p>
+    <header class="sec-head reveal">
+      <p class="tag">03 / Experience</p>
+      <h2>Where I’ve worked</h2>
     </header>
-    <ol class="ledger">
+    <ol class="timeline">
       {
         experience.map((job) => (
-          <li class="job">
-            <div class="org">
+          <li class="reveal">
+            <div class="t-org">
               <h3>{job.org}</h3>
               <p>
                 {job.parent && <>{job.parent}, </>}
                 {job.place}
               </p>
             </div>
-            <div class="roles">
+            <div class="t-roles">
               {job.roles.map((r) => (
-                <div class="role">
-                  <div class="role-head">
+                <div class="t-role">
+                  <div class="t-head">
                     <h4>{r.title}</h4>
-                    <span class="when num">{r.when}</span>
+                    <span class="num">{r.when}</span>
                   </div>
-                  <ul>
-                    {r.points.map((pt) => (
-                      <li>{pt}</li>
-                    ))}
-                  </ul>
+                  <p>{r.points[0]}</p>
+                  {r.points.length > 1 && (
+                    <details>
+                      <summary>More</summary>
+                      <ul>
+                        {r.points.slice(1).map((pt) => (
+                          <li>{pt}</li>
+                        ))}
+                      </ul>
+                    </details>
+                  )}
                 </div>
               ))}
             </div>
@@ -136,77 +169,75 @@ import { projects } from '../data/projects';
   </section>
 
   <section id="education" class="wrap section">
-    <header class="sec-head">
-      <span class="note">Note 3</span>
-      <h2>Education and leadership</h2>
+    <header class="sec-head reveal">
+      <p class="tag">04 / Education and leadership</p>
+      <h2>Beyond work</h2>
     </header>
-    <div class="cols">
-      <div>
-        <h3 class="label">Education</h3>
-        <ul class="entries">
-          {
-            education.map((e) => (
-              <li>
-                <b>{e.degree}</b>
-                <span>{e.org}</span>
-                <span class="when num">{e.when}</span>
-                <p>{e.detail}</p>
-              </li>
-            ))
-          }
-        </ul>
-      </div>
-      <div>
-        <h3 class="label">Leadership</h3>
-        <ul class="entries">
-          {
-            leadership.map((l) => (
-              <li>
-                <b>{l.role}</b>
-                <span>{l.org}</span>
-                <span class="when num">{l.when}</span>
-                <p>{l.text}</p>
-              </li>
-            ))
-          }
-        </ul>
-      </div>
-      <div>
-        <h3 class="label">Certifications</h3>
-        <ul class="entries">
+    <div class="cards">
+      {
+        education.map((e) => (
+          <div class="card reveal">
+            <p class="c-k">Education</p>
+            <h3>{e.degree}</h3>
+            <p class="c-org">{e.org}</p>
+            <p class="c-d">{e.detail}</p>
+          </div>
+        ))
+      }
+      {
+        leadership.map((l) => (
+          <div class="card reveal">
+            <p class="c-k">Leadership</p>
+            <h3>{l.role}</h3>
+            <p class="c-org">{l.org}</p>
+            <p class="c-d">{l.text}</p>
+          </div>
+        ))
+      }
+      <div class="card reveal">
+        <p class="c-k">Certifications</p>
+        <ul class="certs">
           {
             certifications.map((c) => (
               <li>
                 <b>{c.name}</b>
-                <span>{c.by}</span>
-                <span class="when num">{c.when}</span>
+                <span>
+                  {c.by}, {c.when}
+                </span>
               </li>
             ))
           }
         </ul>
-        <h3 class="label">Toolkit</h3>
-        <dl class="toolkit">
-          {
-            toolkit.map((t) => (
-              <div>
-                <dt>{t.group}</dt>
-                <dd>{t.items.join(', ')}</dd>
-              </div>
-            ))
-          }
-        </dl>
       </div>
     </div>
   </section>
 
-  <section id="contact" class="wrap section contact">
-    <span class="note">Note 4</span>
-    <h2>Let’s talk.</h2>
+  <section id="contact" class="wrap contact reveal">
+    <p class="tag">05 / Contact</p>
+    <h2>Let’s build something<br />useful together.</h2>
     <p>{site.status}</p>
     <a class="big-mail" href={`mailto:${site.email}`}>{site.email}</a>
     <div class="actions">
       <a class="btn" href={site.linkedin}>LinkedIn</a>
-      <a class="btn" href={site.resume}>Resume (PDF)</a>
+      <a class="btn ghost" href={site.resume}>Resume (PDF)</a>
     </div>
   </section>
+
+  <script>
+    // Play the project clips only while visible; with reduced motion, show controls instead.
+    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const clips = document.querySelectorAll<HTMLVideoElement>('video[data-loop]');
+    if (calm) clips.forEach((v) => (v.controls = true));
+    else {
+      const io = new IntersectionObserver(
+        (es) => es.forEach((e) => {
+          const v = e.target as HTMLVideoElement;
+          if (e.isIntersecting) v.play().catch(() => (v.controls = true));
+          else v.pause();
+        }),
+        { threshold: 0.3 },
+      );
+      clips.forEach((v) => io.observe(v));
+    }
+  </script>
 </Base>

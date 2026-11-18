@@ -1,7 +1,6 @@
 ---
-import '@fontsource-variable/fraunces/opsz.css';
-import '@fontsource-variable/fraunces/opsz-italic.css';
-import '@fontsource-variable/hanken-grotesk/wght.css';
+import '@fontsource-variable/archivo/wdth.css';
+import '@fontsource-variable/jetbrains-mono/wght.css';
 import '../styles/global.css';
 import { site } from '../data/site';
 
@@ -39,8 +38,8 @@ const person = {
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <meta name="theme-color" content="#f4f1e9" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0f1311" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#09090c" />
+    <meta name="color-scheme" content="dark" />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={site.name} />
@@ -54,14 +53,8 @@ const person = {
 
     <script type="application/ld+json" set:html={JSON.stringify(person)} />
 
-    <!-- Runs before first paint: marks that JavaScript is on, and applies a saved theme so it never flashes. -->
-    <script is:inline>
-      document.documentElement.classList.add('js');
-      try {
-        var saved = localStorage.getItem('theme');
-        if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
-      } catch (e) {}
-    </script>
+    <!-- Marks that JavaScript is on, so scroll reveals only apply when they can be undone. -->
+    <script is:inline>document.documentElement.classList.add('js');</script>
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
@@ -74,14 +67,8 @@ const person = {
         <nav aria-label="Main">
           <a href="/#work">Work</a>
           <a class="hide-s" href="/#experience">Experience</a>
-          <a class="hide-s" href="/#education">Education</a>
-          <a href="/#contact">Contact</a>
-          <button class="theme" type="button" aria-label="Switch between dark and light theme">
-            <svg viewBox="0 0 16 16" aria-hidden="true">
-              <circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
-              <path d="M8 1.75a6.25 6.25 0 0 1 0 12.5z" fill="currentColor"></path>
-            </svg>
-          </button>
+          <a class="hide-s" href="/#contact">Contact</a>
+          <a class="nav-cta" href={site.resume}>Resume</a>
         </nav>
       </div>
     </header>
@@ -102,16 +89,15 @@ const person = {
     </footer>
 
     <script is:inline>
-      document.querySelector('.theme').addEventListener('click', function () {
-        var root = document.documentElement;
-        var current =
-          root.dataset.theme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        var next = current === 'dark' ? 'light' : 'dark';
-        root.dataset.theme = next;
-        try {
-          localStorage.setItem('theme', next);
-        } catch (e) {}
-      });
+      // Fade sections in as they scroll into view. Skipped entirely with reduced motion.
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (es) {
+          es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+        }, { rootMargin: '0px 0px -8% 0px' });
+        document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+      } else {
+        document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('in'); });
+      }
     </script>
   </body>
 </html>
