@@ -103,7 +103,10 @@ export const experience: Job[] = [
       {
         title: 'Consulting Summer Intern',
         when: 'Jun 2021 – Aug 2021',
-        points: ['Conducted benchmarking, data analysis and market research informing client transformation strategy.'],
+        points: [
+          'Conducted benchmarking, data analysis and market research informing client transformation strategy.',
+          'Supported consultants across workstreams on business transformation, risk assessment and audit readiness.',
+        ],
       },
     ],
   },
