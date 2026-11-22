@@ -17,6 +17,7 @@
   --dot: #48505a;
   --sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
   --mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', monospace;
+  --display: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
   --w: 1240px;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   color-scheme: dark;
@@ -282,10 +283,7 @@ nav a:hover {
 
 /* ---- hero ---- */
 .hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr);
-  gap: clamp(2rem, 5vw, 4.5rem);
-  align-items: center;
+  display: block;
   padding: clamp(2.5rem, 6vw, 5rem) 0 clamp(2.5rem, 5vw, 4rem);
 }
 .who {
@@ -313,8 +311,23 @@ nav a:hover {
   letter-spacing: -0.045em;
   line-height: 1;
 }
+.hero-text {
+  max-width: none;
+}
+.hero h1 .name {
+  display: block;
+  font-family: var(--display);
+  font-style: normal;
+  font-weight: 400;
+  font-size: clamp(1.5em, 2.1em, 2.1em);
+  letter-spacing: -0.025em;
+  line-height: 0.9;
+  color: var(--ink);
+}
 .hero h1 span {
   display: block;
+  max-width: 24ch;
+  text-wrap: balance;
   margin-top: 0.6rem;
   font-size: 0.5em;
   font-weight: 400;

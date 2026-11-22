@@ -1,19 +1,32 @@
 ---
-// SkillGuard's recorded result for the unsafe test skill, from the project README.
-// Rows appear in sequence when scrolled into view, ending in the decision.
-const rows = [
+// A recorded run shown as rows that appear in sequence when scrolled into view.
+// Defaults to SkillGuard's result for the unsafe test skill; other projects pass their own log.
+export type Log = {
+  top: [string, string];
+  rows: { k: string; v: string; s: string; tone: string }[];
+  flow: string[];
+  caption: string;
+};
+const skillguard: Log = {
+  top: ['skillguard / recorded run', 'unsafe receipt skill'],
+  flow: ['pause', 'sandbox', 'evidence', 'decide'],
+  caption: 'The static scanner read the code and passed it. Running it showed what it actually did.',
+  rows: [
   { k: 'Static scan, NVIDIA SkillSpector', v: '7 / 100', s: 'rated safe', tone: 'warn' },
   { k: 'Receipt tasks in sandbox', v: '12 / 12', s: 'correct', tone: 'muted' },
   { k: 'Private-file reads attempted', v: '13', s: 'all denied', tone: 'bad' },
   { k: 'Model reviewer', v: 'allow', s: 'overruled', tone: 'warn' },
   { k: 'SkillGuard decision', v: 'blocked', s: 'not installed', tone: 'ok' },
-];
+  ],
+};
+const { log = skillguard } = Astro.props as { log?: Log };
+const rows = log.rows;
 ---
 
 <figure class="runlog" data-runlog>
   <div class="rl-top mono">
-    <span>skillguard / recorded run</span>
-    <span>unsafe receipt skill</span>
+    <span>{log.top[0]}</span>
+    <span>{log.top[1]}</span>
   </div>
   <ol class="rl-rows">
     {
@@ -28,9 +41,9 @@ const rows = [
     }
   </ol>
   <div class="rl-flow mono" aria-hidden="true">
-    <span>pause</span><i></i><span>sandbox</span><i></i><span>evidence</span><i></i><span class="end">decide</span>
+    {log.flow.map((f, i) => (i === 0 ? <span>{f}</span> : <><i></i><span class={i === log.flow.length - 1 ? 'end' : undefined}>{f}</span></>))}
   </div>
-  <figcaption>The static scanner read the code and passed it. Running it showed what it actually did.</figcaption>
+  <figcaption>{log.caption}</figcaption>
 </figure>
 
 <script>

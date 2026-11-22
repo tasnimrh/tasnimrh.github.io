@@ -18,7 +18,7 @@ const { project: p, next, i } = Astro.props;
 <Base title={p.title} description={p.summary}>
   <article class="wrap case-page">
     <header class="case-head">
-      <a class="back mono" href="/#work">All work</a>
+      <a class="back mono" href="/#work">All projects</a>
       <p class="mono muted reveal">{String(i + 1).padStart(2, '0')} / {p.context}, {p.when}</p>
       <h1 class="reveal" style="--d:1">{p.title}</h1>
       <p class="question reveal" style="--d:2">{p.question}</p>
@@ -37,8 +37,8 @@ const { project: p, next, i } = Astro.props;
     </dl>
 
     <section class="case-block reveal">
-      <p class="mono label">{p.visual === 'budget' ? 'Try it: move the review budget' : 'The recorded run'}</p>
-      {p.visual === 'budget' ? <Budget /> : <RunLog />}
+      <p class="mono label">{p.visual === 'budget' ? 'Try it: move the review budget' : p.visual === 'pipeline' ? 'The verification run' : 'The recorded run'}</p>
+      {p.visual === 'budget' ? <Budget /> : <RunLog log={p.log} />}
     </section>
 
     <dl class="facts reveal">
@@ -73,7 +73,7 @@ const { project: p, next, i } = Astro.props;
     {
       p.media && (
         <section class="case-block reveal">
-          <p class="mono label">{p.visual === 'budget' ? 'From the analysis' : 'The working app'}</p>
+          <p class="mono label">{p.visual === 'budget' ? 'From the analysis' : p.visual === 'pipeline' ? 'The evidence' : 'The working app'}</p>
           <Gallery items={p.media} />
         </section>
       )
@@ -90,7 +90,7 @@ const { project: p, next, i } = Astro.props;
     </div>
 
     <nav class="next" aria-label="More work">
-      <a class="mono" href="/#work">All work</a>
+      <a class="mono" href="/#work">All projects</a>
       <a class="nx" href={`/work/${next.slug}/`}>
         <span class="mono muted">Next case</span>
         <strong>{next.title}</strong>

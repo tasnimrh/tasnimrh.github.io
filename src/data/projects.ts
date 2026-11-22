@@ -10,6 +10,8 @@ export type Media = {
   caption: string;
 };
 
+import type { Log } from '../components/RunLog.astro';
+
 export type Project = {
   slug: string;
   title: string;
@@ -28,7 +30,8 @@ export type Project = {
   limits: string[];
   links: { label: string; href: string }[];
   media?: Media[];
-  visual: 'budget' | 'runlog';
+  visual: 'budget' | 'runlog' | 'pipeline';
+  log?: Log;
 };
 
 export const projects: Project[] = [
@@ -39,10 +42,10 @@ export const projects: Project[] = [
     when: 'Fall 2026',
     role: 'Model tuning, ensembles and final evaluation, team of seven',
     summary:
-      'A model that ranks e-commerce orders by their risk of arriving late, using only what is known when the order is approved, so operations can review the right orders first.',
+      'A late order earns 2.2 stars; an on-time one, 4.3. This model ranks orders by late-arrival risk at approval, so a small operations team reviews the right orders before the customer is let down.',
     metrics: [
       { v: '36.1%', l: 'of late orders caught at a 10% review budget' },
-      { v: '3.6×', l: 'more than random review' },
+      { v: '6.8', l: 'reviews per late order caught, against 24 at random' },
       { v: '85,371', l: 'orders, time-ordered validation' },
     ],
     stack: ['Python', 'scikit-learn', 'pandas'],
@@ -67,6 +70,7 @@ export const projects: Project[] = [
     results: [
       'Reviewing the riskiest 10% of orders catches 316 of the 876 late ones in the test period (36.1%). Random review catches 10.2%; a two-feature baseline, 33.6%.',
       'The final model beats both baselines on every metric: PR-AUC of 0.126 against 0.109 for the two-feature baseline, a gain of 0.017 (95% CI 0.006 to 0.027).',
+      'In operations terms: at the 10% budget, the team reviews 6.8 orders for every late order it catches, against 24 under random review. Reviewing pays off whenever preventing one late delivery is worth more than about seven reviews.',
       'The selected model is also the simplest candidate: a tuned logistic regression that trains in about a second and whose coefficients an operations team can read.',
     ],
     limits: [
@@ -163,5 +167,80 @@ export const projects: Project[] = [
       },
     ],
     visual: 'runlog',
+  },
+  {
+    slug: 'kafka-spark-streaming',
+    title: 'Streaming pipeline: Kafka to Spark, verified end to end',
+    context: 'McGill Enterprise ML in Production',
+    when: 'Nov 2026',
+    role: 'Solo: code, infrastructure and verification',
+    summary:
+      'A 2022 course pipeline no longer ran on 2026 platforms. I rebuilt it on Confluent Cloud and Databricks with a registered Avro contract, and proved every event arrived exactly once.',
+    metrics: [
+      { v: '32/32', l: 'events landed, from three producers' },
+      { v: '0', l: 'duplicates, checked by event id' },
+      { v: '9', l: 'breaking issues fixed in the 2022 code' },
+    ],
+    stack: ['Kafka', 'Avro', 'Spark Structured Streaming', 'Databricks', 'Delta Lake'],
+    question: 'When events flow in from three different producers, how do you prove none were lost or duplicated?',
+    lede: 'I rebuilt a Kafka and Spark course pipeline that no longer ran, gave it a data contract, and ended it with a check that compares what was sent with what landed.',
+    facts: [
+      { label: 'My part', value: 'Solo: all code, cloud setup and verification' },
+      { label: 'Context', value: 'McGill INSY 684 Enterprise Machine Learning in Production, November 2026' },
+      { label: 'Platforms', value: 'Confluent Cloud (Basic cluster, 6 partitions), Databricks Free Edition on serverless compute' },
+      { label: 'Stack', value: 'PySpark, confluent-kafka 2.16.1, Avro, Schema Registry, Delta Lake' },
+    ],
+    problem: [
+      'The provided notebook was written for Databricks Community Edition, which has since been retired. On serverless compute its streaming queries were rejected, one configuration line was not valid Python, and API keys sat in plain text in every cell.',
+      'Worse, the streaming job read a topic and wrote back into the same topic, so every run doubled the data. A pipeline like that looks fine in a demo and corrupts every report built on it.',
+    ],
+    myPart: [
+      'Designed a CustomerEvent Avro schema and registered it in Confluent Schema Registry as the contract between producers and consumers. An enum rejects a misspelled event type at write time, a UUID per event makes duplicates detectable, and optional fields keep the schema able to evolve.',
+      'Wrote helpers so Spark writes the same Confluent wire format (magic byte plus schema id) as the official Python client, so every message decodes both in Confluent and in Spark.',
+      'Produced events three ways: a Spark batch write, an idempotent Python producer with acks=all, and a Structured Streaming job fed by arriving files. Consumed them as a stream into a Delta table, with checkpoints and the availableNow trigger that serverless compute supports.',
+      'Moved credentials into a Databricks secret scope and broke the feedback loop by landing the consumer stream in Delta instead of the source topic.',
+    ],
+    results: [
+      'All 32 events landed: 3 from the Spark batch job, 9 from the Python producer and 20 from the stream, with 0 duplicates and a single schema id across all of them.',
+      'The notebook stops with an error if any count does not match, so silent data loss halts the run instead of reaching a report.',
+      'No credentials appear in the notebook, its export or the screenshots.',
+    ],
+    limits: [
+      'Synthetic customer events at small scale. It shows correctness and pipeline design, not throughput.',
+      'Spark’s Kafka sink delivers at least once. Duplicates are detectable by event id, but downstream de-duplication is not built yet.',
+      'The availableNow trigger processes on demand. A low-latency version would run it as a scheduled job.',
+    ],
+    links: [{ label: 'Code on GitHub', href: 'https://github.com/tasnimrh/kafka-spark-streaming' }],
+    media: [
+      {
+        kind: 'image',
+        src: '/media/kafka-verification.webp',
+        w: 1448,
+        h: 937,
+        alt: 'Databricks notebook output: every verification check passes',
+        caption: 'The last cell of the notebook: what each producer sent against what landed in Delta.',
+      },
+      {
+        kind: 'image',
+        src: '/media/kafka-confluent-topic.webp',
+        w: 1550,
+        h: 936,
+        alt: 'Confluent Cloud topic databricks_test showing 32 Avro messages decoded as readable fields',
+        caption: 'Confluent Cloud decodes every message as readable fields because each one carries the registered schema.',
+      },
+    ],
+    visual: 'pipeline',
+    log: {
+      top: ['kafka to spark / verification run', '12 nov 2026'],
+      flow: ['produce', 'kafka', 'spark', 'delta'],
+      caption: 'Every event sent was counted again where it landed.',
+      rows: [
+        { k: 'Spark batch write', v: '3 / 3', s: 'landed', tone: 'muted' },
+        { k: 'Python producer, idempotent', v: '9 / 9', s: 'landed', tone: 'muted' },
+        { k: 'Spark Structured Streaming', v: '20 / 20', s: 'landed', tone: 'muted' },
+        { k: 'Duplicates by event id', v: '0', s: 'pass', tone: 'ok' },
+        { k: 'End-to-end check', v: '32 / 32', s: 'pass', tone: 'ok' },
+      ],
+    },
   },
 ];

@@ -5,7 +5,7 @@ export const site = {
   name: 'Tasnim Hassan',
   role: 'Analytics and AI',
   lead: 'I build machine learning and analytics for business decisions. Four years in corporate finance at Informa, Assembly Global and KPMG taught me what decision-makers need from the numbers.',
-  looking: 'Open to roles in data science, technology consulting, strategy and digital transformation.',
+  looking: 'Open to data science and analytics roles in commercial and financial analytics, in-house or in consulting.',
   description:
     'Tasnim Hassan builds machine learning and analytics for business decisions, backed by four years in corporate finance at Informa, Assembly Global and KPMG. McGill MMA, graduating August 2027.',
   email: 'tasnim.hassan@mail.mcgill.ca',
@@ -26,10 +26,10 @@ export const glance = [
 
 // The numbers strip. Each one is backed by a project or the resume.
 export const stats = [
-  { to: 36.1, dec: 1, suf: '%', label: 'of late deliveries caught by reviewing the riskiest 10% of orders', href: '/work/olist-late-delivery/' },
-  { to: 13, dec: 0, suf: '/13', label: 'private-file reads caught at runtime in an AI skill a static scanner rated safe', href: '/work/skillguard/' },
   { to: 70, dec: 0, pre: '£', suf: 'M', label: 'multi-entity portfolio reported each month at Informa', href: '#experience' },
   { to: 15, dec: 0, suf: '%', label: 'better forecast accuracy from budgets and three-year models', href: '#experience' },
+  { to: 32, dec: 0, suf: '/32', label: 'streaming events verified end to end across Kafka, Spark and Delta', href: '/work/kafka-spark-streaming/' },
+  { to: 13, dec: 0, suf: '/13', label: 'private-file reads caught at runtime in an AI skill a static scanner rated safe', href: '/work/skillguard/' },
 ];
 
 export type Role = { title: string; when: string; points: string[] };
@@ -142,25 +142,24 @@ export const capabilities = [
 ];
 
 export const certifications = [
-  { name: 'AI Fluency: Framework and Foundations', by: 'Anthropic', when: 'Oct 2026' },
-  { name: 'AWS Cloud Practitioner Essentials', by: 'Amazon Web Services', when: 'Oct 2026' },
   { name: 'Databricks Fundamentals', by: 'Databricks', when: 'Oct 2026' },
+  { name: 'AWS Cloud Practitioner Essentials', by: 'Amazon Web Services', when: 'Oct 2026' },
 ];
 
 // Work in progress, shown under the case studies. No results are claimed until they exist.
 export const ongoing = [
+  {
+    title: 'Origin: finding the change that caused a bug',
+    context: 'Atlassian Codegeist 2026 hackathon, Nov 2026 to present',
+    role: 'Solo builder: design, code and evaluation',
+    text: 'A Jira and Bitbucket app. When a bug fix is merged, it traces the fixed lines back through the code history to the pull request that introduced the bug, then suggests the affected releases and any maintained branches still missing the fix. Nothing is written to Jira until a person confirms. Accuracy will be measured against a published dataset of developer-labelled bug origins.',
+    stack: ['Atlassian Forge', 'Jira', 'Bitbucket'],
+  },
   {
     title: 'Sales analytics for Novartis Pharma Canada',
     context: 'McGill capstone with Novartis, Sep 2026 to present',
     role: 'Team lead and solutions architect, team of four',
     text: 'An AI-powered sales analytics solution: HCP segmentation, territory optimization and field activity insights in one decision-ready dashboard. I own the solution architecture, the client meetings and the statement of work.',
     stack: [] as string[],
-  },
-  {
-    title: 'Origin: finding the change that caused a bug',
-    context: 'Atlassian Codegeist 2026 hackathon, Nov 2026 to present',
-    role: 'Project lead, team of two',
-    text: 'A Jira and Bitbucket app. When a bug fix is merged, it traces the fixed lines back through the code history to the pull request that introduced the bug, then suggests the affected releases and any maintained branches still missing the fix. Nothing is written to Jira until a person confirms. Accuracy will be measured against a published dataset of developer-labelled bug origins.',
-    stack: ['Atlassian Forge', 'Jira', 'Bitbucket'],
   },
 ];

@@ -1,6 +1,5 @@
 ---
 import Base from '../layouts/Base.astro';
-import OrderField from '../components/OrderField.astro';
 import Budget from '../components/Budget.astro';
 import RunLog from '../components/RunLog.astro';
 import { site, glance, stats, experience, education, leadership, capabilities, certifications, ongoing } from '../data/site';
@@ -19,12 +18,12 @@ import { projects } from '../data/projects';
         </div>
       </div>
       <h1 class="reveal" style="--d:1">
-        Tasnim Hassan
+        <em class="name">Tasnim Hassan</em>
         <span>Four years in corporate finance, now in analytics and AI.</span>
       </h1>
       <p class="lead reveal" style="--d:2">{site.lead}</p>
       <div class="actions reveal" style="--d:3">
-        <a class="btn primary" href="#work">View work</a>
+        <a class="btn primary" href="#work">View projects</a>
         <a class="btn" href={site.resume}>Resume</a>
         <a class="btn icon" href={site.linkedin} aria-label="LinkedIn profile">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.75h4v11H3v-11zm6.5 0h3.8v1.5h.06c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.77 2.65 4.77 6.1v5.45h-4v-4.83c0-1.15-.02-2.63-1.6-2.63-1.6 0-1.85 1.25-1.85 2.55v4.91h-4v-11z"></path></svg>
@@ -50,9 +49,6 @@ import { projects } from '../data/projects';
         }
       </dl>
     </div>
-    <div class="hero-vis reveal" style="--d:2">
-      <OrderField />
-    </div>
   </section>
 
   <section class="wrap" aria-label="Selected results">
@@ -74,8 +70,8 @@ import { projects } from '../data/projects';
 
   <section id="work" class="wrap section">
     <header class="sec-head">
-      <p class="mono label" data-scramble>01 / selected work</p>
-      <h2 class="reveal">Selected work, measured end to end.</h2>
+      <p class="mono label" data-scramble>01 / projects</p>
+      <h2 class="reveal">Projects, measured end to end.</h2>
       <p class="reveal sub">Each case covers the business question, my part, the results and the limits.</p>
     </header>
 
@@ -117,7 +113,7 @@ import { projects } from '../data/projects';
                 Read the case study
               </a>
             </div>
-            <div class="p-vis">{p.visual === 'budget' ? <Budget compact /> : <RunLog />}</div>
+            <div class="p-vis">{p.visual === 'budget' ? <Budget compact /> : <RunLog log={p.log} />}</div>
           </div>
         </article>
       ))
@@ -216,7 +212,7 @@ import { projects } from '../data/projects';
           ))
         }
       </dl>
-      <h3 class="mono label sub-label">Certifications</h3>
+      <h3 class="mono label sub-label">Certifications and training</h3>
       <ul class="rows">
         {
           certifications.map((c) => (
