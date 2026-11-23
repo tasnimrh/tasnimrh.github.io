@@ -2,28 +2,30 @@
 import Base from '../layouts/Base.astro';
 import OrderField from '../components/OrderField.astro';
 import PulseStream from '../components/PulseStream.astro';
+import LedgerModel from '../components/LedgerModel.astro';
 import RunLog from '../components/RunLog.astro';
-import { site, glance, stats, experience, education, leadership, capabilities, certifications, ongoing } from '../data/site';
+import { site, track, stats, experience, education, leadership, capabilities, certifications, ongoing } from '../data/site';
 import { projects } from '../data/projects';
 ---
 
 <Base>
   <!-- First screen: who, what, where, how to reach her, and proof. Recruiters decide here. -->
   <section class="hero wrap">
-    <div class="hero-text">
-      <div class="who reveal">
-        <img class="avatar" src={site.photo} alt={`Portrait of ${site.name}`} width="400" height="400" fetchpriority="high" />
-        <div>
-          <p class="mono status"><i class="pulse" aria-hidden="true"></i>Open to roles</p>
-          <p class="mono muted">Montreal, Canada</p>
+    <div class="hero-grid">
+      <div class="hero-text">
+        <div class="who reveal">
+          <img class="avatar" src={site.photo} alt={`Portrait of ${site.name}`} width="400" height="400" fetchpriority="high" />
+          <div>
+            <p class="mono status"><i class="pulse" aria-hidden="true"></i>Open to roles</p>
+            <p class="mono muted">Montreal, no sponsorship required</p>
+          </div>
         </div>
-      </div>
-      <h1 class="reveal" style="--d:1">
-        <em class="name">Tasnim Hassan</em>
-        <span>Four years in corporate finance, now in analytics and AI.</span>
-      </h1>
-      <p class="lead reveal" style="--d:2">{site.lead}</p>
-      <div class="actions reveal" style="--d:3">
+        <h1 class="reveal" style="--d:1"><span class="name">Tasnim Hassan</span></h1>
+        <p class="story reveal" style="--d:2">
+          Four years closing the books on a <b>£70M portfolio</b> at Informa. Now I build the <b>models that forecast them.</b>
+        </p>
+        <p class="lead reveal" style="--d:3">{site.lead}</p>
+        <div class="actions reveal" style="--d:4">
         <a class="btn primary" href="#work">View projects</a>
         <a class="btn" href={site.resume}>Resume</a>
         <a class="btn icon" href={site.linkedin} aria-label="LinkedIn profile">
@@ -36,19 +38,23 @@ import { projects } from '../data/projects';
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.6" d="M3.5 6.5h17v11h-17zM3.5 7l8.5 6.5L20.5 7"></path></svg>
         </a>
       </div>
-      <dl class="glance reveal" style="--d:4">
+      </div>
+      <div class="hero-vis reveal" style="--d:3">
+        <LedgerModel />
+      </div>
+    </div>
+    <div class="track reveal" style="--d:5">
+      <p class="mono label">Where I have worked and studied</p>
+      <ul>
         {
-          glance.map((g) => (
-            <div>
-              <dt class="mono">{g.k}</dt>
-              <dd>
-                <b>{g.v}</b>
-                <span>{g.d}</span>
-              </dd>
-            </div>
+          track.map((t) => (
+            <li>
+              <b>{t.org}</b>
+              <span class="mono">{t.note}</span>
+            </li>
           ))
         }
-      </dl>
+      </ul>
     </div>
   </section>
 

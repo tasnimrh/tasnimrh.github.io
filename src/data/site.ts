@@ -4,7 +4,7 @@
 export const site = {
   name: 'Tasnim Hassan',
   role: 'Analytics and AI',
-  lead: 'I build machine learning and analytics for business decisions. Four years in corporate finance at Informa, Assembly Global and KPMG taught me what decision-makers need from the numbers.',
+  lead: 'I build machine learning and analytics for commercial and financial decisions. Working alongside a CFO and seven cost-centre heads taught me what decision-makers need from the numbers, and what they ignore.',
   looking: 'Open to data science and analytics roles in commercial and financial analytics, in-house or in consulting.',
   description:
     'Tasnim Hassan builds machine learning and analytics for business decisions, backed by four years in corporate finance at Informa, Assembly Global and KPMG. McGill MMA, graduating August 2027.',
@@ -16,12 +16,13 @@ export const site = {
   photo: '/tasnim.jpg',
 };
 
-// The first-glance facts. Recruiters check title, company, dates and education first,
-// so these sit on the first screen.
-export const glance = [
-  { k: 'Now', v: 'MMA candidate, McGill Desautels', d: 'GPA 4.0. Team lead on the Novartis capstone.' },
-  { k: 'Before', v: 'Finance Analyst, Informa', d: 'London, 2022 to 2025. Also Assembly Global and KPMG.' },
-  { k: 'Status', v: 'Based in Montreal', d: 'No sponsorship required. Graduating August 2027.' },
+// The track record strip on the first screen: recognisable organisations, one line each.
+export const track = [
+  { org: 'Informa PLC', note: 'Finance, 2022 to 2025' },
+  { org: 'KPMG UK', note: 'Consulting intern' },
+  { org: 'Stagwell', note: 'Assembly Global, finance' },
+  { org: 'Novartis', note: 'Capstone client, team lead' },
+  { org: 'McGill Desautels', note: 'MMA, GPA 4.0, 2027' },
 ];
 
 // The numbers strip. Each one is backed by a project or the resume.

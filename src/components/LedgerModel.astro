@@ -1,0 +1,317 @@
+---
+// Hero visual: a P&L drawn in dots dissolves into a forecast and back.
+// The story in one image: four years closing the books, now building the models that forecast them.
+// Figures are illustrative (stated in the caption).
+---
+
+<figure class="lm" data-lm>
+  <div class="lm-top mono">
+    <span><i class="lm-dot" aria-hidden="true"></i><b data-lm-from>then</b> the ledger <em>→</em> <b data-lm-to>now</b> the model</span>
+    <span class="lm-mode" data-lm-mode>month-end close, £m</span>
+  </div>
+  <div class="lm-canvas">
+    <canvas role="img" aria-label="A profit and loss statement made of dots dissolves and rebuilds itself as a forecast chart."></canvas>
+  </div>
+  <figcaption class="mono">
+    <span><i class="k ink"></i>the books</span>
+    <span><i class="k mid"></i>actuals</span>
+    <span><i class="k acc"></i>forecast</span>
+    <span class="lm-note">Illustrative figures</span>
+  </figcaption>
+</figure>
+
+<script>
+  type Pt = { hx: number; hy: number; hc: number[]; tx: number; ty: number; tc: number[]; d: number; j: number };
+
+  const hex = (h: string) => {
+    const v = h.trim().replace('#', '');
+    return [parseInt(v.slice(0, 2), 16), parseInt(v.slice(2, 4), 16), parseInt(v.slice(4, 6), 16)];
+  };
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-lm]')) {
+    const canvas = root.querySelector('canvas')!;
+    const ctx = canvas.getContext('2d')!;
+    const modeEl = root.querySelector<HTMLElement>('[data-lm-mode]')!;
+    const fromEl = root.querySelector<HTMLElement>('[data-lm-from]')!;
+    const toEl = root.querySelector<HTMLElement>('[data-lm-to]')!;
+    const cs = getComputedStyle(document.documentElement);
+    const C = {
+      ink: hex(cs.getPropertyValue('--ink')),
+      muted: hex(cs.getPropertyValue('--muted')),
+      dim: hex(cs.getPropertyValue('--dim')),
+      dot: hex(cs.getPropertyValue('--dot')),
+      acc: hex(cs.getPropertyValue('--accent')),
+      miss: hex(cs.getPropertyValue('--miss')),
+    };
+    const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let W = 0, H = 0, dpr = 1, pts: Pt[] = [], step = 3, base = 0, todayX = 0, chartL = 0, chartR = 0, chartTop = 0;
+
+    const rows: [string, string, number][] = [
+      ['Revenue', '70.0', 1],
+      ['Cost of sales', '(41.2)', -1],
+      ['Gross margin', '28.8', 1],
+      ['Operating costs', '(19.5)', -1],
+      ['EBITDA', '9.3', 1],
+    ];
+
+    const build = () => {
+      const r = canvas.getBoundingClientRect();
+      W = Math.max(260, r.width); H = Math.max(200, r.height);
+      dpr = Math.min(2, window.devicePixelRatio || 1);
+      canvas.width = W * dpr; canvas.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // 1. the ledger, rasterised and sampled into dots
+      const pad = Math.round(W * 0.07);
+      const fs = Math.min(34, (W - pad * 2) / 13.4);
+      step = Math.max(1.6, fs / 13);
+      const off = document.createElement('canvas');
+      off.width = Math.ceil(W); off.height = Math.ceil(H);
+      const o = off.getContext('2d')!;
+      o.font = `600 ${fs}px ${cs.getPropertyValue('--mono')}`;
+      o.textBaseline = 'middle';
+      const lh = fs * 1.42;
+      const y0 = H / 2 - (lh * (rows.length - 1)) / 2;
+      rows.forEach(([label, num, sign], i) => {
+        const y = y0 + i * lh + (i === rows.length - 1 ? fs * 0.22 : 0);
+        o.fillStyle = i === rows.length - 1 ? '#ff0000' : '#800000';
+        o.textAlign = 'left'; o.fillText(label, pad, y);
+        o.fillStyle = sign > 0 ? '#00ff00' : '#0000ff';
+        o.textAlign = 'right'; o.fillText(num, W - pad, y);
+      });
+      const img = o.getImageData(0, 0, off.width, off.height).data;
+      const home: { x: number; y: number; c: number[] }[] = [];
+      for (let y = 0; y < off.height; y += step) {
+        for (let x = 0; x < off.width; x += step) {
+          const k = (Math.round(y) * off.width + Math.round(x)) * 4;
+          if (img[k + 3] < 140) continue;
+          const [R, G, B] = [img[k], img[k + 1], img[k + 2]];
+          const c = G > 120 ? C.ink : B > 120 ? C.miss : R > 200 ? C.ink : [190, 195, 201];
+          home.push({ x, y, c });
+        }
+      }
+      const N = home.length;
+
+      // 2. the forecast: monthly columns of dots, actuals then a widening forecast band
+      chartL = pad; chartR = W - pad; base = H - Math.max(26, H * 0.1);
+      const top = Math.max(22, H * 0.09);
+      const M = 30, F = 9;
+      const vals = Array.from({ length: M }, (_, m) => 1 + m * 0.03 + 0.22 * Math.sin((m / 12) * Math.PI * 2 - 1.2) + (m < M - F ? 0.05 * Math.sin(m * 2.7) : 0));
+      const sum = vals.reduce((a, b) => a + b, 0);
+      const counts = vals.map((v) => Math.floor((N * v) / sum));
+      let rem = N - counts.reduce((a, b) => a + b, 0);
+      for (let m = 0; rem > 0; m = (m + 1) % M, rem--) counts[m]++;
+      const cw = (chartR - chartL) / M;
+      const avail = base - top;
+      const mx = Math.max(...counts);
+      let k = 3, s = 3;
+      for (; k >= 1; k--) {
+        s = Math.min(6, (avail * 0.82) / Math.ceil(mx / k));
+        if ((k - 1) * s <= cw * 0.62) break;
+      }
+      chartTop = base - Math.ceil(mx / k) * s - 8;
+      const tgt: { x: number; y: number; c: number[] }[] = [];
+      counts.forEach((n, m) => {
+        const fc = m >= M - F;
+        const spread = fc ? (m - (M - F) + 1) / F : 0;
+        const x0 = chartL + m * cw + (cw - (k - 1) * s) / 2;
+        for (let i = 0; i < n; i++) {
+          const col = i % k, row = Math.floor(i / k);
+          let y = base - row * s;
+          const rows = Math.ceil(n / k);
+          if (fc && row > rows * 0.55) y -= (Math.random() - 0.3) * spread * s * rows * 0.35;
+          tgt.push({ x: x0 + col * s, y, c: fc ? C.acc : [118, 125, 134] });
+        }
+      });
+      todayX = chartL + (M - F) * cw;
+
+      // 3. pair them left to right so the ledger sweeps into the timeline
+      home.sort((a, b) => a.x - b.x || a.y - b.y);
+      tgt.sort((a, b) => a.x - b.x || b.y - a.y);
+      pts = home.map((h, i) => {
+        const t = tgt[i];
+        return { hx: h.x, hy: h.y, hc: h.c, tx: t.x, ty: t.y, tc: t.c, d: (h.x / W) * 0.55 + Math.random() * 0.12, j: Math.random() * Math.PI * 2 };
+      });
+    };
+
+    // timeline (ms): hold ledger, morph out, hold chart, morph back
+    const HOLD_A = 2600, MORPH = 2300, HOLD_B = 4400;
+    const CYCLE = HOLD_A + MORPH + HOLD_B + MORPH;
+    const eio = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+    const mix = (a: number[], b: number[], t: number) => `rgb(${a[0] + (b[0] - a[0]) * t | 0},${a[1] + (b[1] - a[1]) * t | 0},${a[2] + (b[2] - a[2]) * t | 0})`;
+
+    let t0 = performance.now(), raf = 0, running = false, mode = '';
+    const setMode = (m: string) => {
+      if (m === mode) return;
+      mode = m;
+      modeEl.textContent = m;
+      const chart = m.startsWith('forecast');
+      fromEl.classList.toggle('on', !chart);
+      toEl.classList.toggle('on', chart);
+    };
+
+    const draw = (now: number) => {
+      const t = calm ? HOLD_A + MORPH + 1 : (now - t0) % CYCLE;
+      // global phase g: 0 = ledger, 1 = chart
+      let g: number, dir = 1;
+      if (t < HOLD_A) g = 0;
+      else if (t < HOLD_A + MORPH) g = (t - HOLD_A) / MORPH;
+      else if (t < HOLD_A + MORPH + HOLD_B) g = 1;
+      else { g = 1 - (t - HOLD_A - MORPH - HOLD_B) / MORPH; dir = -1; }
+      setMode(g > 0.5 ? 'forecast, next 9 months' : 'month-end close, £m');
+
+      ctx.clearRect(0, 0, W, H);
+      const span = 1 - 0.67;
+      // chart furniture fades in with the chart
+      const fa = Math.max(0, (g - 0.6) / 0.4);
+      if (fa > 0) {
+        ctx.globalAlpha = 0.5 * fa;
+        ctx.fillStyle = `rgb(${C.dim.join(',')})`;
+        ctx.fillRect(chartL, base + 5, chartR - chartL, 1);
+        ctx.setLineDash([3, 4]);
+        ctx.strokeStyle = `rgb(${C.muted.join(',')})`;
+        ctx.beginPath(); ctx.moveTo(todayX, base + 12); ctx.lineTo(todayX, chartTop); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 0.85 * fa;
+        ctx.font = `500 10.5px ${cs.getPropertyValue('--mono')}`;
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = `rgb(${C.muted.join(',')})`;
+        ctx.textAlign = 'left'; ctx.fillText('actuals', chartL, base + 11);
+        ctx.fillStyle = `rgb(${C.acc.join(',')})`;
+        ctx.textAlign = 'right'; ctx.fillText('forecast', chartR, base + 11);
+        ctx.fillStyle = `rgb(${C.muted.join(',')})`;
+        ctx.textAlign = 'center'; ctx.fillText('today', todayX, base + 11);
+      }
+      // ledger rule above EBITDA
+      const la = Math.max(0, 1 - g * 3);
+      if (la > 0 && pts.length) {
+        ctx.globalAlpha = 0.35 * la;
+        ctx.fillStyle = `rgb(${C.dim.join(',')})`;
+        const fs = Math.min(34, (W - Math.round(W * 0.07) * 2) / 13.4), lh = fs * 1.42;
+        const yR = H / 2 + lh * 1.5 + fs * 0.11;
+        ctx.fillRect(Math.round(W * 0.07), yR, W - Math.round(W * 0.07) * 2, 1);
+      }
+
+      const sz = Math.min(step * 0.66, 2.1);
+      for (const p of pts) {
+        // each dot starts after its own delay, so the change sweeps left to right
+        const r = dir > 0 ? g : 1 - g;
+        const local = Math.min(1, Math.max(0, (r - p.d) / span));
+        const e = dir > 0 ? eio(local) : 1 - eio(local);
+        const lift = Math.sin(e * Math.PI) * (H * 0.06) * Math.sin(p.j);
+        const x = p.hx + (p.tx - p.hx) * e;
+        const y = p.hy + (p.ty - p.hy) * e - lift;
+        const tw = e > 0.98 && p.tc === C.acc ? 0.65 + 0.35 * Math.sin(now / 520 + p.j) : 1;
+        ctx.globalAlpha = (e < 0.02 ? 0.95 : 0.9) * tw;
+        ctx.fillStyle = mix(p.hc, p.tc, e);
+        ctx.fillRect(x - sz / 2, y - sz / 2, sz, sz);
+      }
+      ctx.globalAlpha = 1;
+      if (running && !calm) raf = requestAnimationFrame(draw);
+    };
+
+    const init = () => { build(); draw(performance.now()); };
+    const start = () => { if (!running && !calm) { running = true; raf = requestAnimationFrame(draw); } };
+    const stop = () => { running = false; cancelAnimationFrame(raf); };
+
+    (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => {
+      init();
+      let w = canvas.getBoundingClientRect().width;
+      new ResizeObserver(() => {
+        const nw = canvas.getBoundingClientRect().width;
+        if (Math.abs(nw - w) > 2) { w = nw; init(); }
+      }).observe(canvas);
+      if (!calm) {
+        new IntersectionObserver(([e]) => (e.isIntersecting ? start() : stop()), { threshold: 0.05 }).observe(canvas);
+        document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+      }
+    });
+  }
+</script>
+
+<style>
+  .lm {
+    position: relative;
+    margin: 0;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background:
+      radial-gradient(120% 80% at 80% 0%, rgba(126, 224, 195, 0.06), transparent 60%),
+      var(--s1);
+    overflow: hidden;
+    box-shadow: 0 30px 80px -40px rgba(0, 0, 0, 0.8);
+  }
+  .lm-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1.1rem;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.74rem;
+    color: var(--dim);
+  }
+  .lm-top b {
+    font-weight: 500;
+    color: var(--dim);
+    transition: color 0.4s;
+  }
+  .lm-top b.on {
+    color: var(--accent);
+  }
+  .lm-top em {
+    font-style: normal;
+    color: var(--muted);
+    margin: 0 0.15rem;
+  }
+  .lm-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-right: 0.55rem;
+    vertical-align: 1px;
+    box-shadow: 0 0 10px var(--accent);
+  }
+  .lm-mode {
+    color: var(--muted);
+  }
+  .lm-canvas {
+    aspect-ratio: 16 / 10.5;
+  }
+  .lm-canvas canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.1rem;
+    align-items: center;
+    padding: 0.75rem 1.1rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.7rem;
+    color: var(--dim);
+  }
+  .k {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 2px;
+    margin-right: 0.45rem;
+    vertical-align: 0;
+  }
+  .k.ink { background: var(--ink); }
+  .k.mid { background: var(--dim); }
+  .k.acc { background: var(--accent); }
+  .lm-note {
+    margin-left: auto;
+  }
+  @media (max-width: 640px) {
+    .lm-top { font-size: 0.68rem; flex-direction: column; gap: 0.2rem; }
+    .lm-canvas { aspect-ratio: 16 / 12; }
+    .lm-note { margin-left: 0; }
+  }
+</style>
