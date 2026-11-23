@@ -30,7 +30,7 @@ export type Project = {
   limits: string[];
   links: { label: string; href: string }[];
   media?: Media[];
-  visual: 'budget' | 'runlog' | 'pipeline';
+  visual: 'budget' | 'runlog' | 'pipeline' | 'pulse';
   log?: Log;
 };
 
@@ -101,6 +101,65 @@ export const projects: Project[] = [
       },
     ],
     visual: 'budget',
+  },
+  {
+    slug: 'brand-pulse',
+    title: 'Brand Pulse: what live data did to my brand-alert pipeline',
+    context: 'Personal project, Kafka and Databricks',
+    when: 'Nov 2026',
+    role: 'Built end to end: producer, pipeline, detection and evaluation',
+    summary:
+      'Every public Bluesky post streams through Kafka into Databricks to flag brands having a bad day. It passed its tests, then real data broke it three ways. Each fix is measured.',
+    metrics: [
+      { v: '359,699', l: 'live posts processed in one evening' },
+      { v: '17%', l: 'of brand mentions were bots or ads (30% of Amazon’s)' },
+      { v: '1 → 0', l: 'false alerts after “a link is not a mention”' },
+    ],
+    stack: ['Kafka', 'Avro', 'PySpark', 'Databricks', 'Delta Lake', 'Python'],
+    question: 'When a brand has a bad day, how fast does it show up in public, and can you trust the alarm?',
+    lede: 'A producer on my laptop streams every new public Bluesky post into Kafka. Databricks matches 31 brands, scores mood, and raises an alert when a brand’s share of the conversation jumps above its own baseline. The interesting part came after it ran on real data.',
+    facts: [
+      { label: 'My part', value: 'Producer, pipeline, detection rules, tests and the live evaluation' },
+      { label: 'Data', value: 'Bluesky Jetstream, every new public post; 359,699 posts on 22 Nov 2026, 5:14 to 7:58 pm' },
+      { label: 'Platforms', value: 'Confluent Cloud (Kafka, Schema Registry), Databricks Free Edition serverless, Delta Lake' },
+      { label: 'Tests', value: '45, including the full Spark pipeline on local Spark' },
+    ],
+    problem: [
+      'Social listening tools count mentions and score sentiment. Most portfolio versions stop once the pipeline runs, and never check whether the alerts are real.',
+      'I wanted the opposite: a brand alert I could defend. That meant comparing each brand with its own baseline, separating real conversation from noise, and reading the posts behind every alert.',
+    ],
+    myPart: [
+      'Built the producer: it reads the Bluesky firehose (about 35 posts a second, every language), keeps new posts, and writes them to Kafka as Avro with a registered schema. It resumes from a cursor after a dropped connection, so nothing inside the lookback window is lost.',
+      'Wrote brand matching that handles ambiguous names on purpose: Rogers is not Fred Rogers, TD is not a touchdown, Tesla is not Nikola Tesla. Every case is a unit test.',
+      'Scored each brand on 5-minute windows by share of voice, not raw counts, so a busy evening across the whole platform does not fire every brand at once. An alert needs 30 minutes of baseline, 8 or more mentions, 3x the expected count and a Poisson tail probability below 0.001.',
+      'Ran it live, read the evidence, and fixed what the real data exposed (below).',
+    ],
+    results: [
+      'Amazon’s “conversation” was mostly bots. Sampling 30 of its 1,253 first-run mentions showed deal bots and affiliate posts. After the filter: 303 of 1,824 brand mentions (17%) were bots or ads, 30% of Amazon’s.',
+      'The first alert was a false alarm. Spotify spiked to 3.3x its expected count, but reading the posts showed people sharing songs (open.spotify.com/track/…), not talking about Spotify. Rule: a link is not a mention. It cut matches by about a third and removed the alert.',
+      'Streaming jobs never finished. On serverless, availableNow streams read everything and kept running, so a scheduled job could not end. I replaced them with incremental batch reads that track each record’s Kafka offset: exactly once, and every run ends in about two minutes.',
+      'Among brands with 50+ real mentions, Uber (52% negative) and Delta Air Lines (49%) had the most negative conversation, against 25 to 28% for OpenAI, Netflix, Spotify and Microsoft.',
+    ],
+    limits: [
+      'Bluesky is not the whole internet; this measures conversation on Bluesky.',
+      'VADER sentiment is English-only and misses sarcasm. French posts count toward volume but get no score.',
+      'One quiet Sunday evening produced no true alerts. Measuring alert precision needs days of data and a hand check of every alert.',
+    ],
+    links: [{ label: 'Code on GitHub', href: 'https://github.com/tasnimrh/brand-pulse' }],
+    visual: 'pulse',
+    log: {
+      top: ['brand pulse / what the live data broke', 'first run'],
+      flow: ['match', 'filter', 'score', 'alert'],
+      caption: 'Each problem was found by reading the evidence, fixed, and covered by a test.',
+      rows: [
+        { k: 'Amazon matches, after the link rule', v: '994', s: 'matched', tone: 'muted' },
+        { k: 'Of those, deal bots and ads', v: '297', s: 'removed', tone: 'bad' },
+        { k: 'First alert: Spotify', v: '3.3x', s: 'song links', tone: 'warn' },
+        { k: 'After “a link is not a mention”', v: '0', s: 'false alerts', tone: 'ok' },
+        { k: 'Serverless stream', v: 'never ended', s: 'replaced', tone: 'bad' },
+        { k: 'Offset-tracked batch', v: '~2 min', s: 'always ends', tone: 'ok' },
+      ],
+    },
   },
   {
     slug: 'skillguard',

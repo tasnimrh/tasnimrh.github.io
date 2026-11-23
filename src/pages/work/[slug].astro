@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import Gallery from '../../components/Gallery.astro';
 import Budget from '../../components/Budget.astro';
 import OrderField from '../../components/OrderField.astro';
+import PulseStream from '../../components/PulseStream.astro';
 import RunLog from '../../components/RunLog.astro';
 import { projects } from '../../data/projects';
 
@@ -45,9 +46,17 @@ const { project: p, next, i } = Astro.props;
         </section>
       )
     }
+    {
+      p.visual === 'pulse' && (
+        <section class="case-block reveal">
+          <p class="mono label">Every post, matched and filtered</p>
+          <PulseStream />
+        </section>
+      )
+    }
 
     <section class="case-block reveal">
-      <p class="mono label">{p.visual === 'budget' ? 'Try it: move the review budget' : p.visual === 'pipeline' ? 'The verification run' : 'The recorded run'}</p>
+      <p class="mono label">{p.visual === 'budget' ? 'Try it: move the review budget' : p.visual === 'pipeline' ? 'The verification run' : p.visual === 'pulse' ? 'What the live data broke' : 'The recorded run'}</p>
       {p.visual === 'budget' ? <Budget /> : <RunLog log={p.log} />}
     </section>
 

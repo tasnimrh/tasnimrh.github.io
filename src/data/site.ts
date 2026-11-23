@@ -28,7 +28,7 @@ export const glance = [
 export const stats = [
   { to: 70, dec: 0, pre: '£', suf: 'M', label: 'multi-entity portfolio reported each month at Informa', href: '#experience' },
   { to: 15, dec: 0, suf: '%', label: 'better forecast accuracy from budgets and three-year models', href: '#experience' },
-  { to: 32, dec: 0, suf: '/32', label: 'streaming events verified end to end across Kafka, Spark and Delta', href: '/work/kafka-spark-streaming/' },
+  { to: 359699, dec: 0, suf: '', label: 'live social posts streamed through Kafka and Databricks in one evening', href: '/work/brand-pulse/' },
   { to: 13, dec: 0, suf: '/13', label: 'private-file reads caught at runtime in an AI skill a static scanner rated safe', href: '/work/skillguard/' },
 ];
 

@@ -1,0 +1,338 @@
+---
+// Brand Pulse visual. Posts stream in from the left, a few match a brand, deal bots and
+// affiliate posts are filtered out, and the rest land in per-brand bars that show how much
+// of each brand's conversation was negative. Counts and bars come from the first live run
+// (22 Nov 2026). Particle density is illustrative: matches are drawn far more often than
+// their real rate so the flow is visible.
+const brands = [
+  { name: 'Amazon', n: 697, neg: 0.27 },
+  { name: 'OpenAI', n: 183, neg: 0.25 },
+  { name: 'Netflix', n: 156, neg: 0.25 },
+  { name: 'Microsoft', n: 127, neg: 0.28 },
+  { name: 'Spotify', n: 94, neg: 0.25 },
+  { name: 'Uber', n: 59, neg: 0.52 },
+  { name: 'Tesla', n: 56, neg: 0.31 },
+  { name: 'Delta', n: 50, neg: 0.49 },
+];
+const totals = { posts: 359699, mentions: 1824, bots: 303, real: 1521 };
+---
+
+<figure class="pstream" data-pulse data-brands={JSON.stringify(brands)} data-totals={JSON.stringify(totals)}>
+  <div class="pulse-top mono">
+    <span><i class="pulse-dot" aria-hidden="true"></i>bluesky / live firehose / 22 nov 2026</span>
+    <span class="pulse-mode" data-mode>streaming posts</span>
+  </div>
+  <div class="pulse-canvas">
+    <canvas aria-hidden="true"></canvas>
+    <div class="gates mono" aria-hidden="true">
+      <span class="gate g1">brand match</span>
+      <span class="gate g2">bot &amp; ad filter</span>
+      <span class="gate g3">mood, % negative</span>
+    </div>
+  </div>
+  <dl class="pulse-read mono">
+    <div><dt>posts</dt><dd data-c="posts">0</dd></div>
+    <div><dt>brand mentions</dt><dd data-c="mentions">0</dd></div>
+    <div class="bad"><dt>bots &amp; ads removed</dt><dd data-c="bots">0</dd></div>
+    <div class="hi"><dt>real conversation</dt><dd data-c="real">0</dd></div>
+  </dl>
+  <figcaption>
+    <span class="lg"><i class="d dim"></i>Post, no brand</span>
+    <span class="lg"><i class="d caught"></i>Brand mention</span>
+    <span class="lg"><i class="d miss"></i>Bot or ad, removed</span>
+    <span class="note">Counts and bars are from the first live run, 5:14 to 7:58 pm. Brand matches are drawn far more often than their real rate (about 1 in 200 posts) so the flow is visible.</span>
+  </figcaption>
+</figure>
+
+<script>
+  type Brand = { name: string; n: number; neg: number };
+  document.querySelectorAll<HTMLElement>('[data-pulse]').forEach((root) => {
+    const canvas = root.querySelector('canvas')!;
+    const ctx = canvas.getContext('2d')!;
+    const brands: Brand[] = JSON.parse(root.dataset.brands!);
+    const totals = JSON.parse(root.dataset.totals!);
+    const modeEl = root.querySelector('[data-mode]')!;
+    const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const css = getComputedStyle(document.documentElement);
+    const C = {
+      dim: css.getPropertyValue('--dot').trim() || '#2b3036',
+      accent: css.getPropertyValue('--accent').trim() || '#7ee0c3',
+      miss: css.getPropertyValue('--miss').trim() || '#e58d8d',
+      ink: css.getPropertyValue('--ink').trim() || '#e6edf3',
+      muted: css.getPropertyValue('--muted').trim() || '#9198a1',
+    };
+    const maxN = Math.max(...brands.map((b) => b.n));
+    const weights = brands.map((b) => b.n / totals.real);
+
+    let W = 0, H = 0, g1 = 0, g2 = 0, g3 = 0, laneX = 0, barX = 0, barW = 0, laneH = 0, top = 0;
+    const fit = () => {
+      const r = canvas.getBoundingClientRect();
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      W = r.width; H = r.height;
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const narrow = W < 520;
+      root.classList.toggle('is-narrow', narrow);
+      if (narrow) { g1 = W * 0.13; g2 = W * 0.27; laneX = W * 0.37; }
+      else { g1 = W * 0.24; g2 = W * 0.42; laneX = W * 0.56; }
+      barX = laneX + 76; barW = W - barX - 40;
+      top = 30; laneH = (H - top - 14) / brands.length;
+      root.style.setProperty('--g1', `${g1}px`);
+      root.style.setProperty('--g2', `${g2}px`);
+      root.style.setProperty('--g3', `${barX}px`);
+    };
+
+    const hits: number[] = [];
+    type P = { x: number; y: number; vy: number; speed: number; fate: 0 | 1 | 2; lane: number; ty: number; alpha: number; r: number };
+    const parts: P[] = [];
+    const pickLane = () => {
+      let u = Math.random(), i = 0;
+      while (i < weights.length - 1 && u > weights[i]) { u -= weights[i]; i++; }
+      return i;
+    };
+    const spawn = () => {
+      const u = Math.random();
+      const fate: 0 | 1 | 2 = u < 0.82 ? 0 : u < 0.82 + 0.18 * (totals.bots / totals.mentions) ? 2 : 1;
+      const lane = pickLane();
+      parts.push({
+        x: -4, y: top + Math.random() * (H - top - 14), vy: (Math.random() - 0.5) * 0.15,
+        speed: 0.9 + Math.random() * 0.9, fate, lane, ty: top + (lane + 0.5) * laneH, alpha: 1,
+        r: fate === 0 ? 1.4 : 2.1,
+      });
+    };
+
+    // Cycle (ms): fill, hold, fade.
+    const FILL = 9000, HOLD = 3500, FADE = 900, CYCLE = FILL + HOLD + FADE;
+    let t0 = performance.now(), running = false, raf = 0, last = performance.now();
+    const fmt = (n: number) => Math.round(n).toLocaleString('en-US');
+
+    const draw = (now: number) => {
+      const dt = Math.min(48, now - last); last = now;
+      const t = calm ? FILL + 1 : (now - t0) % CYCLE;
+      const prog = Math.min(1, t / FILL);
+      const ease = 1 - Math.pow(1 - prog, 3);
+      const fade = t > FILL + HOLD ? 1 - (t - FILL - HOLD) / FADE : 1;
+      if (t < 30 && parts.length > 400) parts.length = 0;
+
+      ctx.clearRect(0, 0, W, H);
+
+      // gates
+      ctx.globalAlpha = 1;
+      for (const [gx, col] of [[g1, C.accent], [g2, C.miss]] as const) {
+        const grd = ctx.createLinearGradient(0, top, 0, H);
+        grd.addColorStop(0, col + '00'); grd.addColorStop(0.5, col + '55'); grd.addColorStop(1, col + '00');
+        ctx.fillStyle = grd; ctx.fillRect(gx, top - 6, 1, H - top);
+      }
+
+      // lanes
+      ctx.font = '500 10.5px "Geist Mono Variable", ui-monospace, monospace';
+      ctx.textBaseline = 'middle';
+      brands.forEach((b, i) => {
+        const y = top + (i + 0.5) * laneH;
+        const w = (b.n / maxN) * barW * ease * fade;
+        const hot = b.neg >= 0.45;
+        ctx.globalAlpha = 0.9;
+        ctx.fillStyle = hot ? C.ink : C.muted;
+        ctx.textAlign = 'left';
+        ctx.fillText(b.name, laneX + 6, y);
+        const h = hits[i] || 0;
+        if (h > 0.02) {
+          ctx.globalAlpha = h * fade; ctx.fillStyle = C.accent; ctx.shadowColor = C.accent; ctx.shadowBlur = 10;
+          ctx.beginPath(); ctx.arc(laneX - 6, y, 2.6, 0, 6.283); ctx.fill(); ctx.shadowBlur = 0;
+          hits[i] = h * 0.93;
+        }
+        ctx.globalAlpha = 0.12; ctx.fillStyle = C.muted;
+        ctx.fillRect(barX, y - 3.5, barW, 7);
+        ctx.globalAlpha = 0.85; ctx.fillStyle = C.accent;
+        ctx.fillRect(barX, y - 3.5, Math.max(0, w * (1 - b.neg)), 7);
+        ctx.fillStyle = C.miss;
+        ctx.fillRect(barX + w * (1 - b.neg), y - 3.5, Math.max(0, w * b.neg), 7);
+        ctx.globalAlpha = (hot ? 1 : 0.7) * ease * fade;
+        ctx.fillStyle = hot ? C.miss : C.muted;
+        ctx.textAlign = 'right';
+        ctx.fillText(`${Math.round(b.neg * 100)}%`, W - 4, y);
+      });
+
+      // particles
+      if (!calm && t < FILL + HOLD) {
+        const rate = W / 260;
+        for (let k = 0; k < rate * (dt / 16); k++) if (Math.random() < 0.55) spawn();
+      }
+      for (let i = parts.length - 1; i >= 0; i--) {
+        const p = parts[i];
+        p.x += p.speed * (dt / 16) * (W / 520);
+        p.y += p.vy * (dt / 16);
+        let col = C.dim, a = 0.55, r = p.r;
+        if (p.fate === 0) {
+          if (p.x > g1) p.alpha -= 0.05 * (dt / 16);
+          a = 0.45 * p.alpha;
+        } else {
+          if (p.x > g1) col = C.accent;
+          if (p.fate === 2 && p.x > g2) { col = C.miss; p.vy += 0.06 * (dt / 16); p.alpha -= 0.025 * (dt / 16); }
+          if (p.fate === 1 && p.x > g2) p.y += (p.ty - p.y) * 0.08 * (dt / 16);
+          a = p.alpha;
+          if (p.fate === 1 && p.x > laneX - 8) { hits[p.lane] = 1; parts.splice(i, 1); continue; }
+        }
+        if (p.alpha <= 0 || p.x > W || p.y > H + 4) { parts.splice(i, 1); continue; }
+        ctx.globalAlpha = a * fade;
+        ctx.fillStyle = col;
+        if (col === C.accent) { ctx.shadowColor = C.accent; ctx.shadowBlur = 6; }
+        ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 6.283); ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+      ctx.globalAlpha = 1;
+
+      (root.querySelector('[data-c=posts]') as HTMLElement).textContent = fmt(totals.posts * ease);
+      (root.querySelector('[data-c=mentions]') as HTMLElement).textContent = fmt(totals.mentions * ease);
+      (root.querySelector('[data-c=bots]') as HTMLElement).textContent = fmt(totals.bots * ease);
+      (root.querySelector('[data-c=real]') as HTMLElement).textContent = fmt(totals.real * ease);
+      modeEl.textContent = prog < 0.3 ? 'streaming posts' : prog < 0.6 ? 'matching brands' : prog < 1 ? 'filtering bots & ads' : 'mood by brand';
+      if (running && !calm) raf = requestAnimationFrame(draw);
+    };
+
+    fit();
+    new ResizeObserver(() => { fit(); if (!running) draw(performance.now()); }).observe(canvas);
+    const start = () => { if (!running) { running = true; last = performance.now(); raf = requestAnimationFrame(draw); } };
+    const stop = () => { running = false; cancelAnimationFrame(raf); };
+    if (calm) draw(performance.now());
+    else {
+      new IntersectionObserver(([e]) => (e.isIntersecting ? start() : stop()), { threshold: 0.1 }).observe(canvas);
+      document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+    }
+  });
+</script>
+
+<style>
+  .pstream {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0.005));
+    overflow: hidden;
+  }
+  .pulse-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+  }
+  .pulse-top span:first-child {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: pulse-blink 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse-blink {
+    50% {
+      opacity: 0.3;
+    }
+  }
+  .pulse-mode {
+    color: var(--accent);
+  }
+  .pulse-canvas {
+    position: relative;
+    padding: 0.25rem 1rem 0.75rem;
+  }
+  .pulse-canvas canvas {
+    width: 100%;
+    height: clamp(250px, 26vw, 320px);
+    display: block;
+  }
+  .gates {
+    position: absolute;
+    inset: 0.5rem 1rem auto 1rem;
+    height: 1rem;
+    pointer-events: none;
+  }
+  .gate {
+    position: absolute;
+    top: 0;
+    font-size: 0.66rem;
+    color: var(--dim);
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+  .g1 {
+    left: var(--g1, 26%);
+  }
+  .g2 {
+    left: var(--g2, 46%);
+  }
+  .g3 {
+    left: var(--g3, 56%);
+    transform: none;
+  }
+  .pulse-read {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border-top: 1px solid var(--line);
+  }
+  .pulse-read > div {
+    padding: 0.75rem 1rem;
+  }
+  .pulse-read > div + div {
+    border-left: 1px solid var(--line);
+  }
+  .pulse-read dt {
+    color: var(--dim);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .pulse-read dd {
+    font-size: 1.15rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    margin-top: 0.15rem;
+  }
+  .pulse-read .hi dd {
+    color: var(--accent);
+  }
+  .pulse-read .bad dd {
+    color: var(--miss);
+  }
+  .pstream figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+    padding: 0.75rem 1rem 0.9rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .pstream .d.dim {
+    background: var(--dim);
+  }
+  .pstream .note {
+    flex-basis: 100%;
+    color: var(--dim);
+    font-size: 0.74rem;
+  }
+  @media (max-width: 700px) {
+    .pulse-read {
+      grid-template-columns: 1fr 1fr;
+    }
+    .pulse-read > div:nth-child(3) {
+      border-left: 0;
+    }
+    .pulse-read > div:nth-child(n + 3) {
+      border-top: 1px solid var(--line);
+    }
+    .gate {
+      font-size: 0.58rem;
+    }
+  }
+  .pstream.is-narrow .gate.g1,
+  .pstream.is-narrow .gate.g2 {
+    display: none;
+  }
+</style>
