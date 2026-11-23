@@ -3,11 +3,11 @@
 
 export const site = {
   name: 'Tasnim Hassan',
-  role: 'Analytics and AI',
-  lead: 'I build machine learning and analytics for commercial and financial decisions. Working alongside a CFO and seven cost-centre heads taught me what decision-makers need from the numbers, and what they ignore.',
-  looking: 'Open to data science and analytics roles in commercial and financial analytics, in-house or in consulting.',
+  role: 'Data and AI',
+  lead: 'I build data pipelines, machine learning and AI tools for business decisions. Working alongside a CFO and seven cost-centre heads taught me what decision-makers need from the numbers, and what they ignore.',
+  looking: 'Always glad to talk data engineering, applied AI and data science, and the business decisions they feed.',
   description:
-    'Tasnim Hassan builds machine learning and analytics for business decisions, backed by four years in corporate finance at Informa, Assembly Global and KPMG. McGill MMA, graduating August 2027.',
+    'Tasnim Hassan builds data pipelines, machine learning and AI tools for business decisions, backed by four years on the business side at Informa, Assembly Global and KPMG. McGill MMA, graduating August 2027.',
   email: 'tasnim.hassan@mail.mcgill.ca',
   linkedin: 'https://www.linkedin.com/in/tasnimhassan/',
   github: 'https://github.com/tasnimrh',
