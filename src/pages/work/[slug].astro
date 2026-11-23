@@ -75,6 +75,26 @@ const { project: p, next, i } = Astro.props;
       <h2 class="reveal">The problem</h2>
       <div class="reveal">{p.problem.map((t) => <p>{t}</p>)}</div>
 
+      {
+        p.contrast && (
+          <>
+            <h2 class="reveal">How it differs</h2>
+            <div class="reveal">
+              <table class="contrast">
+                <thead>
+                  <tr><th>Most versions</th><th>This one</th><th>Measured</th></tr>
+                </thead>
+                <tbody>
+                  {p.contrast.map((c) => (
+                    <tr><td>{c.usual}</td><td>{c.mine}</td><td class="mono">{c.result}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )
+      }
+
       <h2 class="reveal">What I did</h2>
       <div class="reveal">
         <ol class="steps">{p.myPart.map((t) => <li>{t}</li>)}</ol>

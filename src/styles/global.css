@@ -1709,3 +1709,41 @@ details li::before {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---- case study: how it differs ---- */
+.contrast {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+.contrast th {
+  text-align: left;
+  font: 500 0.7rem/1.4 var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--dim);
+  padding: 0 0.9rem 0.6rem 0;
+  border-bottom: 1px solid var(--line-2);
+}
+.contrast td {
+  padding: 0.75rem 0.9rem 0.75rem 0;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.contrast td:first-child {
+  color: var(--dim);
+  text-decoration: line-through;
+  text-decoration-color: rgba(229, 141, 141, 0.55);
+}
+.contrast td:nth-child(2) {
+  color: var(--ink);
+}
+.contrast td.mono {
+  font-size: 0.8rem;
+  color: var(--accent);
+}
+@media (max-width: 640px) {
+  .contrast { font-size: 0.84rem; }
+  .contrast td, .contrast th { padding-right: 0.5rem; }
+}

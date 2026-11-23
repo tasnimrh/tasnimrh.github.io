@@ -32,6 +32,7 @@ export type Project = {
   media?: Media[];
   visual: 'budget' | 'runlog' | 'pipeline' | 'pulse';
   log?: Log;
+  contrast?: { usual: string; mine: string; result: string }[];
 };
 
 export const projects: Project[] = [
@@ -109,7 +110,7 @@ export const projects: Project[] = [
     when: 'Nov 2026',
     role: 'Built end to end: producer, pipeline, detection and evaluation',
     summary:
-      'Every public Bluesky post streams through Kafka into Databricks to flag brands having a bad day. It passed its tests, then real data broke it three ways. Each fix is measured.',
+      'Most brand-sentiment pipelines count mentions and stop at a dashboard. This one streams every live Bluesky post through Kafka into Databricks and audits its own alerts: bots and ads removed, links not counted, spikes judged against each brand’s own baseline.',
     metrics: [
       { v: '359,699', l: 'live posts processed in one evening' },
       { v: '17%', l: 'of brand mentions were bots or ads (30% of Amazon’s)' },
@@ -125,8 +126,16 @@ export const projects: Project[] = [
       { label: 'Tests', value: '45, including the full Spark pipeline on local Spark' },
     ],
     problem: [
-      'Social listening tools count mentions and score sentiment. Most portfolio versions stop once the pipeline runs, and never check whether the alerts are real.',
-      'I wanted the opposite: a brand alert I could defend. That meant comparing each brand with its own baseline, separating real conversation from noise, and reading the posts behind every alert.',
+      'Streaming social posts through Kafka and Spark to score brand sentiment is a common project. Most versions replay an old dataset, count every keyword hit, and stop once a dashboard shows numbers.',
+      'I wanted the opposite: a brand alert I could defend. That meant live data, separating real conversation from noise, comparing each brand with its own baseline, and reading the posts behind every alert.',
+    ],
+    contrast: [
+      { usual: 'Replay a static or simulated dataset', mine: 'Every new public Bluesky post, live', result: '359,699 posts in one evening' },
+      { usual: 'Count every keyword hit as a mention', mine: 'Deal bots and affiliate ads separated out', result: '17% of mentions were bots or ads; 30% of Amazon’s' },
+      { usual: 'Count shared links as conversation', mine: 'A link is not a mention', result: 'Matches down a third; false Spotify alert gone' },
+      { usual: 'Alert on raw volume or a fixed threshold', mine: 'Share of voice vs each brand’s own baseline, Poisson test', result: 'False alerts from 1 to 0' },
+      { usual: 'Plain keyword matching', mine: 'Ambiguous names handled (Rogers, TD, Tesla)', result: 'Each case a unit test; 45 tests' },
+      { usual: 'A stream that never has to finish', mine: 'Offset-tracked incremental batch reads', result: 'Exactly once; every run ends in about 2 minutes' },
     ],
     myPart: [
       'Built the producer: it reads the Bluesky firehose (about 35 posts a second, every language), keeps new posts, and writes them to Kafka as Avro with a registered schema. It resumes from a cursor after a dropped connection, so nothing inside the lookback window is lost.',
