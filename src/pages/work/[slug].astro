@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import Gallery from '../../components/Gallery.astro';
 import Budget from '../../components/Budget.astro';
+import OrderField from '../../components/OrderField.astro';
 import RunLog from '../../components/RunLog.astro';
 import { projects } from '../../data/projects';
 
@@ -35,6 +36,15 @@ const { project: p, next, i } = Astro.props;
         ))
       }
     </dl>
+
+    {
+      p.visual === 'budget' && (
+        <section class="case-block reveal">
+          <p class="mono label">Watch the model sort real orders</p>
+          <OrderField />
+        </section>
+      )
+    }
 
     <section class="case-block reveal">
       <p class="mono label">{p.visual === 'budget' ? 'Try it: move the review budget' : p.visual === 'pipeline' ? 'The verification run' : 'The recorded run'}</p>

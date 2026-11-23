@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import Budget from '../components/Budget.astro';
+import OrderField from '../components/OrderField.astro';
 import RunLog from '../components/RunLog.astro';
 import { site, glance, stats, experience, education, leadership, capabilities, certifications, ongoing } from '../data/site';
 import { projects } from '../data/projects';
@@ -113,7 +113,7 @@ import { projects } from '../data/projects';
                 Read the case study
               </a>
             </div>
-            <div class="p-vis">{p.visual === 'budget' ? <Budget compact /> : <RunLog log={p.log} />}</div>
+            <div class="p-vis">{p.visual === 'budget' ? <OrderField /> : <RunLog log={p.log} />}</div>
           </div>
         </article>
       ))
