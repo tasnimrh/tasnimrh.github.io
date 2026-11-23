@@ -27,7 +27,7 @@ export const track = [
 
 // The numbers strip. Each one is backed by a project or the resume.
 export const stats = [
-  { to: 70, dec: 0, pre: '£', suf: 'M', label: 'multi-entity portfolio reported each month at Informa', href: '#experience' },
+  { to: 125, dec: 0, pre: '£', suf: 'M+', label: 'multi-entity revenue portfolio reported each month at Informa', href: '#experience' },
   { to: 15, dec: 0, suf: '%', label: 'better forecast accuracy from budgets and three-year models', href: '#experience' },
   { to: 359699, dec: 0, suf: '', label: 'live social posts streamed through Kafka and Databricks in one evening', href: '/work/brand-pulse/' },
   { to: 13, dec: 0, suf: '/13', label: 'private-file reads caught at runtime in an AI skill a static scanner rated safe', href: '/work/skillguard/' },
@@ -61,7 +61,7 @@ export const experience: Job[] = [
         title: 'Finance Analyst',
         when: 'May 2024 – Sep 2025',
         points: [
-          'Owned month-end P&L and cash flow reporting for a £70M multi-entity portfolio, ensuring statutory compliance.',
+          'Owned month-end P&L and cash flow reporting for a £125M+ multi-entity revenue portfolio, ensuring statutory compliance.',
           'Partnered with the CFO and 7+ cost centre heads to strengthen cost control and forecast accuracy.',
           'Built budgeting, forecasting and KPI tracking in SAP and TM1, improving reporting efficiency.',
         ],
